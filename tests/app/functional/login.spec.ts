@@ -1,5 +1,24 @@
+import type { Locator } from '@playwright/test';
 import { expect, test } from '../../../fixtures/pom/test-options';
+import { AppPage } from '../../../pages/app/app.page';
 import { INVALID_LOGIN_ATTEMPTS } from '../../../test-data/static/app/invalidCredentials';
+
+/** Maps an expected-error kind from the static data to its page-object locator. */
+const errorLocator = (
+    appPage: AppPage,
+    kind: (typeof INVALID_LOGIN_ATTEMPTS)[number]['expectedErrors'][number]
+): Locator => {
+    switch (kind) {
+        case 'invalid-credentials':
+            return appPage.errorMessage;
+        case 'email-format':
+            return appPage.emailFormatError;
+        case 'email-required':
+            return appPage.emailRequiredError;
+        case 'password-required':
+            return appPage.passwordRequiredError;
+    }
+};
 
 /**
  * Example functional test suite for login functionality.
@@ -28,7 +47,12 @@ test.describe('functional login', () => {
         }
     );
 
-    for (const { description, email, password } of INVALID_LOGIN_ATTEMPTS) {
+    for (const {
+        description,
+        email,
+        password,
+        expectedErrors,
+    } of INVALID_LOGIN_ATTEMPTS) {
         test(
             `should show error for invalid credentials - ${description}`,
             { tag: '@regression' },
@@ -37,8 +61,10 @@ test.describe('functional login', () => {
                     await appPage.login(email, password);
                 });
 
-                await test.step('THEN error message should be displayed', async () => {
-                    await expect(appPage.errorMessage).toBeVisible();
+                await test.step('THEN the expected error messages should be displayed', async () => {
+                    for (const kind of expectedErrors) {
+                        await expect(errorLocator(appPage, kind)).toBeVisible();
+                    }
                 });
             }
         );

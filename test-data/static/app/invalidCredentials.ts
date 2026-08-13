@@ -41,40 +41,55 @@ export const INVALID_PASSWORDS = [
     ' leading',
 ] as const;
 
+/**
+ * `expectedErrors` values are error KINDS, not message strings — the login
+ * test maps each kind to the `Messages` enum (static data files may export
+ * only literals, so the enum cannot be imported here):
+ * - `invalid-credentials` — server-side rejection (request reaches the API)
+ * - `email-format` / `email-required` / `password-required` — client-side
+ *   form validation (no request is sent)
+ */
 export const INVALID_LOGIN_ATTEMPTS = [
     {
         description: 'valid email with wrong password',
         email: 'test.user@example.com',
         password: 'WrongPassword123!',
+        expectedErrors: ['invalid-credentials'],
     },
     {
         description: 'valid email with incorrect password',
         email: 'admin@test.com',
         password: 'IncorrectPass456$',
+        expectedErrors: ['invalid-credentials'],
     },
     {
         description: 'invalid email format with valid password',
         email: 'invalid-email',
         password: 'ValidPassword123!',
+        expectedErrors: ['email-format'],
     },
     {
         description: 'missing local part in email with valid password',
         email: '@missinglocal.com',
         password: 'SecurePass789#',
+        expectedErrors: ['email-format'],
     },
     {
         description: 'empty email and password',
         email: '',
         password: '',
+        expectedErrors: ['email-required', 'password-required'],
     },
     {
         description: 'invalid email format with short password',
         email: 'not-an-email',
         password: '123',
+        expectedErrors: ['email-format'],
     },
     {
         description: 'incomplete email domain with short password',
         email: 'missing@domain',
         password: 'short',
+        expectedErrors: ['invalid-credentials'],
     },
 ] as const;

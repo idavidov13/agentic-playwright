@@ -45,12 +45,14 @@ jobs:
                   npm run check:skills
                   npm run check:version
 
-            - name: Generated project — live demo-API smoke test (non-blocking)
+            # API only: the demo site's UI is behind Cloudflare bot protection,
+            # which challenges datacenter IPs — UI tests can never pass from CI.
+            - name: Generated project — live demo-API test (non-blocking)
               working-directory: /tmp/smoke/demo-project
               continue-on-error: true
               run: |
                   npx playwright install --with-deps chromium
-                  npx playwright test --grep @smoke
+                  npx playwright test --grep @api --no-deps --project=chromium
 
             - name: Pruned variant — gates still green without Cursor/Copilot trees
               run: |

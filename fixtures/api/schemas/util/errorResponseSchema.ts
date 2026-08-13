@@ -1,43 +1,52 @@
 import { z } from 'zod/v4';
 import type { output as zOutput } from 'zod/v4';
 
-/**
- * Schema for 400 Bad Request responses.
+/*
+ * Error-response schemas for the demo API (practicesoftwaretesting.com).
+ *
+ * FIXME: the OpenAPI spec documents these status codes but not their body
+ * schemas, so the shapes below are captured from live responses per the
+ * "Explore Before Generate" fallback (missing docs flagged upstream).
+ * Re-verify whenever the spec adds error schemas.
  */
-export const BadRequestResponseSchema = z.strictObject({
-    message: z.union([z.string(), z.array(z.string())]),
-    error: z.literal('Bad Request'),
-    statusCode: z.literal(400),
-});
 
 /**
  * Schema for 401 Unauthorized responses.
+ * Live examples: {"error": "Unauthorized"}, {"error": "Invalid login request"}.
  */
 export const UnauthorizedResponseSchema = z.strictObject({
-    message: z.literal('Unauthorized'),
-    statusCode: z.literal(401),
+    error: z.string(),
 });
 
 /**
  * Schema for 403 Forbidden responses.
+ * FIXME: shape not yet observed live — Laravel convention, unverified.
  */
 export const ForbiddenResponseSchema = z.strictObject({
     message: z.string(),
-    error: z.literal('Forbidden'),
-    statusCode: z.literal(403),
 });
 
 /**
  * Schema for 404 Not Found responses.
+ * Live example: {"message": "Requested item not found"}.
  */
 export const NotFoundResponseSchema = z.strictObject({
     message: z.string(),
-    error: z.literal('Not Found'),
-    statusCode: z.literal(404),
 });
 
+/**
+ * Schema for 422 Unprocessable Entity (validation) responses.
+ * Live shape: a map of field name -> array of validation messages.
+ */
+export const UnprocessableEntityResponseSchema = z.record(
+    z.string(),
+    z.array(z.string())
+);
+
 // Type exports
-export type BadRequestResponse = zOutput<typeof BadRequestResponseSchema>;
 export type UnauthorizedResponse = zOutput<typeof UnauthorizedResponseSchema>;
 export type ForbiddenResponse = zOutput<typeof ForbiddenResponseSchema>;
 export type NotFoundResponse = zOutput<typeof NotFoundResponseSchema>;
+export type UnprocessableEntityResponse = zOutput<
+    typeof UnprocessableEntityResponseSchema
+>;

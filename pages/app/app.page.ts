@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
-import { ApiEndpoints, AppRoutes, Messages } from '../../enums/app/app';
+import { AppRoutes, Messages } from '../../enums/app/app';
 import { NavigationComponent } from '../components/navigation.component';
 
 /**
@@ -50,6 +50,18 @@ export class AppPage {
         return this.page.getByText(Messages.LOGIN_ERROR);
     }
 
+    get emailRequiredError(): Locator {
+        return this.page.getByText(Messages.EMAIL_REQUIRED);
+    }
+
+    get passwordRequiredError(): Locator {
+        return this.page.getByText(Messages.PASSWORD_REQUIRED);
+    }
+
+    get emailFormatError(): Locator {
+        return this.page.getByText(Messages.EMAIL_FORMAT_INVALID);
+    }
+
     // ==================== Actions ====================
 
     /**
@@ -77,13 +89,16 @@ export class AppPage {
     }
 
     /**
-     * Performs login with the provided credentials and waits for login response.
-     * Fills in the email and password fields, clicks the login button,
-     * and waits for the login API response.
+     * Performs login with the provided credentials.
+     * Fills in the email and password fields and clicks the login button.
+     *
+     * Note: no response wait here — invalid input can be rejected by
+     * client-side validation without any request being sent. Callers assert
+     * the outcome with web-first assertions, which wait automatically.
      *
      * @param {string} email - The user's email address.
      * @param {string} password - The user's password.
-     * @returns {Promise<void>} Resolves when login request completes.
+     * @returns {Promise<void>} Resolves when the form has been submitted.
      *
      * @example
      * ```ts
@@ -96,13 +111,6 @@ export class AppPage {
         await this.passwordInput.fill(password);
 
         await this.loginButton.click();
-
-        // Wait for login API response
-        await this.page.waitForResponse(
-            (response) =>
-                response.url().includes(ApiEndpoints.LOGIN) &&
-                response.request().method() === 'POST'
-        );
     }
 
     /**
