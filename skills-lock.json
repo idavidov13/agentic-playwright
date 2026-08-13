@@ -1,0 +1,19 @@
+{
+    "version": 1,
+    "skills": {
+        "skill-creator": {
+            "source": "anthropics/skills",
+            "sourceType": "github",
+            "ref": "main",
+            "skillPath": "skills/skill-creator/SKILL.md",
+            "computedHash": "dcd4803e61e913e6fc27294184cd3a71f09f5e924ff20c8a9a20173e7b3c2bcf"
+        },
+        "playwright-cli": {
+            "source": "@playwright/cli",
+            "sourceType": "npm",
+            "skillPath": "skills/playwright-cli/SKILL.md",
+            "computedHash": "716a80315821d6694f8ca1331c1e03ecbdf33c88ce8b4042c7684b4c4ff5e4dc",
+            "note": "Vendored copy is locally customized (description tuned for triggering); reinstall overwrites this customization."
+        }
+    }
+}

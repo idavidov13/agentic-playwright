@@ -1,0 +1,26 @@
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+.auth/
+tests-cases/
+test-downloads/
+
+# Claude Code
+.claude/projects/
+.claude/skills/ai-native-workflow-workspace/
+
+# Environment files (keep .env.example as template)
+env/.env.*
+!env/.env.example
+
+# Dev Container logs
+.devcontainer/*.log
+
+# macOS
+.DS_Store
+
+# Playwright CLI
+.playwright-cli/

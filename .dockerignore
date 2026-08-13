@@ -1,0 +1,24 @@
+# Dependencies (installed fresh in container)
+node_modules/
+
+# Test outputs (generated at runtime)
+test-results/
+playwright-report/
+blob-report/
+
+# Auth state (generated at runtime)
+.auth/
+
+# Git (workspace is bind-mounted, not copied)
+.git/
+
+# Environment files (may contain secrets)
+env/.env.*
+!env/.env.example
+
+# Claude Code local state
+.claude/projects/
+
+# OS files
+.DS_Store
+Thumbs.db

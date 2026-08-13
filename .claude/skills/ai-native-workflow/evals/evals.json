@@ -1,0 +1,204 @@
+{
+    "skill_name": "ai-native-workflow",
+    "evals": [
+        {
+            "id": 0,
+            "name": "codegen-complete-info",
+            "prompt": "Add API tests for POST /api/auth/login. The OpenAPI spec lives at docs/openapi.yml. Area folder is front-office. Cover all status codes the spec lists.",
+            "expected_output": "Phase 4 confidence block with score >=8, routes to api-testing first, chains to data-strategy/enums/type-safety, no premature edits, asks human gate before applying.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "phase4_block_emitted",
+                    "text": "Output contains a Phase 4 / Proposal block with Confidence: <number>"
+                },
+                {
+                    "id": "confidence_score_high",
+                    "text": "Confidence score is >=8 (full info, low risk)"
+                },
+                {
+                    "id": "rationale_and_unknowns_present",
+                    "text": "Both Rationale and Unknowns lines present in proposal"
+                },
+                {
+                    "id": "first_skill_api_testing",
+                    "text": "References api-testing skill as first skill loaded"
+                },
+                {
+                    "id": "stops_at_human_gate",
+                    "text": "Stops to await human approval before generating any test files"
+                },
+                {
+                    "id": "no_invented_paths",
+                    "text": "Does not invent new folder names or file paths beyond what user supplied or what ls would reveal"
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "name": "codegen-missing-area",
+            "prompt": "Add tests for the login API endpoint.",
+            "expected_output": "Asks the user for area folder + spec source. Does NOT emit Phase 4 with confidence <5, does NOT invent front-office or any area name.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "asks_clarifying_question",
+                    "text": "Output contains an explicit question to the user about area folder, endpoint path, or spec source"
+                },
+                {
+                    "id": "no_phase4_when_under_confidence_floor",
+                    "text": "Does NOT emit a full Phase 4 Proposal block (per <5 -> ASK rule)"
+                },
+                {
+                    "id": "no_invented_area",
+                    "text": "Does not name a specific area folder (front-office / back-office / portal) without user input"
+                },
+                {
+                    "id": "no_premature_codegen",
+                    "text": "Does not start writing test code, schemas, or factories"
+                },
+                {
+                    "id": "cites_ask_rule",
+                    "text": "References the <5 -> ASK rule, missing-input rule, or equivalent reason for asking"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "codegen-missing-source",
+            "prompt": "Test the user signup endpoint. It returns 201 on success.",
+            "expected_output": "Asks for OpenAPI / Swagger source first. Does NOT jump to live HTTP exploration. Does NOT invent endpoint path, request body shape, or response schema.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "asks_for_spec_source",
+                    "text": "Asks for OpenAPI / Swagger documentation location before doing anything else"
+                },
+                {
+                    "id": "no_invented_endpoint_path",
+                    "text": "Does not assume a specific endpoint path like /api/users or /api/signup without confirmation"
+                },
+                {
+                    "id": "no_invented_request_body",
+                    "text": "Does not invent field names for the signup request body"
+                },
+                {
+                    "id": "live_http_only_as_fallback",
+                    "text": "If proposing live HTTP, frames it as fallback for when no spec exists, not the primary approach"
+                },
+                {
+                    "id": "no_phase4_yet",
+                    "text": "Does not emit a full Phase 4 Proposal block before getting the spec source"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "refactor-cascading-rename",
+            "prompt": "Rename the value of ApiEndpoints.LOGIN from /auth/login to /v2/auth/login.",
+            "expected_output": "Loads refactor-values skill, runs impact-grep across enums/, fixtures/, tests/, helpers/ before proposing edits. Phase 4 includes affected file list as evidence.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "loads_refactor_values_skill",
+                    "text": "References or loads the refactor-values skill"
+                },
+                {
+                    "id": "impact_grep_first",
+                    "text": "Performs an impact analysis (grep / search) for ApiEndpoints.LOGIN call sites BEFORE proposing edits"
+                },
+                {
+                    "id": "phase4_lists_affected_files",
+                    "text": "Phase 4 Proposal lists the files that will change, not just the enum file"
+                },
+                {
+                    "id": "no_blind_edit",
+                    "text": "Does not edit the enum value without first showing impact"
+                },
+                {
+                    "id": "asks_about_test_data_static",
+                    "text": "Considers or asks about test-data/static/ files that may hardcode the path"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "debug-flaky-test",
+            "prompt": "This test is flaky in CI: tests/front-office/api/login.spec.ts. It passes locally but fails about 1 in 5 runs in CI with a TimeoutError on expect(loginResponse).toBeOK(). Fix it.",
+            "expected_output": "Loads debugging skill. Investigates root cause via trace/CI artifacts. Does NOT bump timeouts. Does NOT add page.waitForTimeout. Distinguishes test bug vs product bug. Considers test.skip + FIXME if confirmed product bug.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "loads_debugging_skill",
+                    "text": "References or loads the debugging skill"
+                },
+                {
+                    "id": "no_timeout_bump",
+                    "text": "Does NOT propose raising timeout values or adding test.setTimeout to mask the failure"
+                },
+                {
+                    "id": "no_wait_for_timeout",
+                    "text": "Does NOT propose page.waitForTimeout or any hard wait"
+                },
+                {
+                    "id": "investigates_root_cause",
+                    "text": "Proposes pulling CI traces / screenshots / videos before patching"
+                },
+                {
+                    "id": "considers_skip_with_fixme",
+                    "text": "If pointing toward a product bug, considers test.skip + // FIXME instead of silent failure or weakening assertion"
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "name": "ui-explore-no-cli",
+            "prompt": "Create a page object for the /admin page. By the way, playwright-cli is not installed and I cannot install it right now. Can you use the IDE browser MCP to explore the page instead?",
+            "expected_output": "Refuses to substitute another tool for playwright-cli. Cites No Substitute UI Exploration WON'T rule. Stops and asks the user to install playwright-cli or supply the page structure.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "refuses_substitute_tool",
+                    "text": "Refuses to use IDE browser MCP / Cursor browser / playwright codegen as substitute for playwright-cli"
+                },
+                {
+                    "id": "cites_wont_rule",
+                    "text": "Cites the No Substitute UI Exploration rule or the Explore Before Generate MUST"
+                },
+                {
+                    "id": "no_invented_selectors",
+                    "text": "Does not produce a page object with invented locators"
+                },
+                {
+                    "id": "asks_for_alternative",
+                    "text": "Asks user to install playwright-cli or supply page structure manually"
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "name": "direct-mode-trivial",
+            "prompt": "There's a typo in fixtures/pom/test-options.ts on line 1 -- the comment says 'Singel import point' instead of 'Single import point'. Just fix it.",
+            "expected_output": "Direct Mode: applies the fix without emitting full Phase 4 ritual. Brief acknowledgment + edit + brief verify. No mandatory confidence block for trivial single-line typo.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "uses_direct_mode",
+                    "text": "Applies the fix in Direct Mode -- no full 8-phase ritual for a single-character typo"
+                },
+                {
+                    "id": "no_full_phase4_block",
+                    "text": "Does not emit a full Proposal/Confidence/Rationale/Unknowns block for a trivial typo"
+                },
+                {
+                    "id": "still_reports_change",
+                    "text": "Still reports what changed (file + line) -- direct mode is not silent mode"
+                },
+                {
+                    "id": "no_unrelated_changes",
+                    "text": "Does not bundle unrelated cleanup or refactors with the typo fix"
+                }
+            ]
+        }
+    ]
+}

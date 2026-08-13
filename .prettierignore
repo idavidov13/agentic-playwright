@@ -1,0 +1,23 @@
+# Build outputs / generated artifacts
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+.playwright-cli/
+
+# Lockfiles
+package-lock.json
+
+# Upstream-tracked Anthropic-style skills -- vendored via skills-lock.json.
+# Reformatting these would change their hash and break `npm run skills:verify`.
+.claude/skills/skill-creator/
+.cursor/skills/skill-creator/
+.github/skills/skill-creator/
+.claude/skills/playwright-cli/
+.cursor/skills/playwright-cli/
+.github/instructions/playwright-cli/
+
+# Generated reports / static viewers shipped with skill-creator
+**/eval-viewer/
+**/assets/eval_review.html

@@ -1,0 +1,55 @@
+# Gates the orchestration layer: every PR (and push to main) touching the
+# rule trees, the Constitution, the linters, or a version surface must pass
+# the skill drift checks and the version-drift check. Pure bash + git -- no
+# Node install needed.
+name: Skill Lint
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - 'CLAUDE.md'
+            - '.claude/**'
+            - '.cursor/**'
+            - '.github/instructions/**'
+            - '.github/skills/**'
+            - '.github/workflows/skill-lint.yml'
+            - 'scripts/check-*.sh'
+            - 'VERSION'
+            - 'package.json'
+            - 'CHANGELOG.md'
+    pull_request:
+        paths:
+            - 'CLAUDE.md'
+            - '.claude/**'
+            - '.cursor/**'
+            - '.github/instructions/**'
+            - '.github/skills/**'
+            - '.github/workflows/skill-lint.yml'
+            - 'scripts/check-*.sh'
+            - 'VERSION'
+            - 'package.json'
+            - 'CHANGELOG.md'
+
+jobs:
+    skill-lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Constitution rules -> skill Critical blocks
+              run: bash scripts/check-rules-drift.sh
+
+            - name: SKILL.md -> references/ pointers, orphans, anchors
+              run: bash scripts/check-skill-references-drift.sh
+
+            - name: Skills Index sync, frontmatter, cross-skill refs
+              run: bash scripts/check-skill-crossrefs.sh
+
+    version-lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: VERSION <-> package.json <-> CHANGELOG consistency
+              run: bash scripts/check-version-drift.sh

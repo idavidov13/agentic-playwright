@@ -1,0 +1,15 @@
+npx lint-staged
+
+# Skill-rules + skill-references drift gates run only when files in any of the
+# three rule trees are staged, so they don't slow unrelated commits.
+if git diff --cached --name-only --diff-filter=ACMR \
+    | grep -qE '^(\.claude/skills/|\.cursor/skills/|\.github/instructions/|\.github/skills/)'; then
+    npm run --silent check:skills-drift
+    npm run --silent check:skills-references
+fi
+
+# Version-drift gate: only when a version surface is staged.
+if git diff --cached --name-only --diff-filter=ACMR \
+    | grep -qE '^(VERSION|package\.json|CHANGELOG\.md)$'; then
+    npm run --silent check:version
+fi

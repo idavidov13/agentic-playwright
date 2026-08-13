@@ -1,0 +1,44 @@
+{
+    "name": "PW Scaffold - AI-Assisted Development",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "..",
+        "args": { "PLAYWRIGHT_VERSION": "1.60.0" }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-playwright.playwright",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "eamodio.gitlens"
+            ],
+            "settings": {
+                "editor.formatOnSave": true,
+                "editor.defaultFormatter": "esbenp.prettier-vscode",
+                "editor.codeActionsOnSave": {
+                    "source.fixAll.eslint": "explicit"
+                },
+                "terminal.integrated.defaultProfile.linux": "bash"
+            }
+        }
+    },
+    "remoteUser": "pwuser",
+    "mounts": [
+        "source=pw-scaffold-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
+        "source=pw-scaffold-claude-config-${devcontainerId},target=/home/pwuser/.claude,type=volume",
+        "source=pw-scaffold-npm-cache-${devcontainerId},target=/home/pwuser/.npm,type=volume",
+        "source=pw-scaffold-pw-cli-browsers-${devcontainerId},target=/ms-playwright-cli,type=volume",
+        "source=pw-scaffold-node-modules-${devcontainerId},target=/workspace/node_modules,type=volume",
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/pwuser/.ssh,type=bind,readonly"
+    ],
+    "containerEnv": {
+        "PLAYWRIGHT_BROWSERS_PATH": "/ms-playwright",
+        "PLAYWRIGHT_CLI_BROWSERS_PATH": "/ms-playwright-cli",
+        "DEVCONTAINER": "true"
+    },
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "workspaceFolder": "/workspace",
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    "postStartCommand": "echo 'Container ready. Run npm test to execute tests.'"
+}
