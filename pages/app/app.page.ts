@@ -26,8 +26,8 @@ export class AppPage {
 
     // ==================== Locators ====================
 
-    get appTitle(): Locator {
-        return this.page.getByRole('heading', { name: 'Application Title' });
+    get loginHeading(): Locator {
+        return this.page.getByRole('heading', { name: 'Login' });
     }
 
     get username(): Locator {
