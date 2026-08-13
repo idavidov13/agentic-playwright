@@ -52,7 +52,7 @@ jobs:
               continue-on-error: true
               run: |
                   npx playwright install --with-deps chromium
-                  npx playwright test --grep @api --no-deps --project=chromium
+                  npx playwright test --project=api
 
             - name: Pruned variant — gates still green without Cursor/Copilot trees
               run: |

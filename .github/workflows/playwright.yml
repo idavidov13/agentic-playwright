@@ -53,7 +53,7 @@ jobs:
               run: npx playwright install --with-deps chromium
 
             - name: Run Playwright tests (API — see header comment)
-              run: npx playwright test --grep @api --no-deps --project=chromium
+              run: npx playwright test --project=api
 
             - uses: actions/upload-artifact@v4
               if: failure()

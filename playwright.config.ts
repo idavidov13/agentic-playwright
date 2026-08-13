@@ -82,9 +82,16 @@ export default defineConfig({
             testMatch: /.*\.setup\.ts/,
         },
 
-        /* Main test project - Chrome */
+        /* API test project - request-context only, no browser storage state */
+        {
+            name: 'api',
+            testMatch: /.*\/api\/.*\.spec\.ts/,
+        },
+
+        /* Main UI test project - Chrome */
         {
             name: 'chromium',
+            testIgnore: /.*\/api\/.*\.spec\.ts/,
             use: {
                 ...devices['Desktop Chrome'],
                 storageState: StorageStatePaths.APP,

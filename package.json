@@ -15,7 +15,7 @@
         "test:smoke": "npx playwright test --grep @smoke --project=chromium",
         "test:sanity": "npx playwright test --grep @sanity --project=chromium",
         "test:regression": "npx playwright test --grep @regression --project=chromium",
-        "test:api": "npx playwright test --grep @api --project=chromium",
+        "test:api": "npx playwright test --project=api",
         "test:e2e": "npx playwright test --grep @e2e --project=chromium",
         "test:destructive": "npx playwright test --grep @destructive --project=chromium --workers=1",
         "report": "npx playwright show-report",
