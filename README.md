@@ -16,6 +16,7 @@ _Not affiliated with Microsoft. [Playwright](https://playwright.dev/) is an open
 
 - [Features](#features)
 - [Prerequisites](#prerequisites)
+- [Quick Start: npm create](#quick-start-npm-create)
 - [Quick Start: Dev Container](#quick-start-dev-container)
     - [Claude Code Custom Status Line](#claude-code-custom-status-line)
 - [Quick Start: Local Setup Script](#quick-start-local-setup-script)
@@ -69,6 +70,26 @@ _Not affiliated with Microsoft. [Playwright](https://playwright.dev/) is an open
 
 - **Node.js** v22.x or later
 - **npm** v10.x or later
+
+## Quick Start: npm create
+
+The fastest path — scaffold a fresh project with everything wired:
+
+```bash
+npm create agentic-playwright my-tests -- --demo
+```
+
+`--demo` asks zero questions: it targets the public demo API, installs dependencies and
+the Playwright browser, and finishes by running the smoke test — you see green before
+writing a line. Other modes:
+
+```bash
+npm create agentic-playwright my-tests            # interactive — 3 questions
+npm create agentic-playwright my-tests -- --bare  # your own app URLs
+```
+
+Useful flags: `--no-cursor` / `--no-copilot` (prune AI rule trees you don't use),
+`--yes`, `--skip-install`, `--skip-browsers`, `--skip-git`, `--skip-smoke`.
 
 ## Quick Start: Dev Container
 

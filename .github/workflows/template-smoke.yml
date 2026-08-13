@@ -1,0 +1,62 @@
+name: Template Smoke Test
+
+# Runs the real initializer end-to-end on every PR: pack the npm package,
+# scaffold a project from the tarball, and verify the generated project
+# passes its own quality gates. The live demo-API smoke test runs too, but
+# is non-blocking — demo API downtime must not fail the build (deterministic
+# checks above it are the gate).
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    template-smoke:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: npm
+
+            - name: Pack the initializer (runs prepack -> bundles template/)
+              working-directory: packages/create-agentic-playwright
+              run: npm pack
+
+            - name: Scaffold a project from the tarball
+              run: |
+                  mkdir -p /tmp/smoke && cd /tmp/smoke
+                  tar -xzf "$GITHUB_WORKSPACE"/packages/create-agentic-playwright/create-agentic-playwright-*.tgz
+                  node package/bin/create.js demo-project --demo --skip-browsers --skip-smoke
+
+            - name: Generated project — TypeScript, ESLint, Prettier
+              working-directory: /tmp/smoke/demo-project
+              run: |
+                  npx tsc --noEmit
+                  npx eslint .
+                  npx prettier --check .
+
+            - name: Generated project — skill + version gates
+              working-directory: /tmp/smoke/demo-project
+              run: |
+                  npm run check:skills
+                  npm run check:version
+
+            - name: Generated project — live demo-API smoke test (non-blocking)
+              working-directory: /tmp/smoke/demo-project
+              continue-on-error: true
+              run: |
+                  npx playwright install --with-deps chromium
+                  npx playwright test --grep @smoke
+
+            - name: Pruned variant — gates still green without Cursor/Copilot trees
+              run: |
+                  cd /tmp/smoke
+                  node package/bin/create.js pruned-project --demo --no-cursor --no-copilot --skip-install --skip-git
+                  cd pruned-project
+                  bash scripts/check-rules-drift.sh
+                  bash scripts/check-skill-references-drift.sh
+                  bash scripts/check-skill-crossrefs.sh

@@ -1,0 +1,44 @@
+{
+    "name": "create-agentic-playwright",
+    "version": "1.0.0",
+    "description": "Production-grade Playwright + TypeScript Scaffold for Agentic Testing. Harness for all major AI coding agents baked in.",
+    "bin": {
+        "create-agentic-playwright": "bin/create.js"
+    },
+    "files": [
+        "bin/",
+        "template/"
+    ],
+    "scripts": {
+        "prepack": "node scripts/prepack.js"
+    },
+    "keywords": [
+        "playwright",
+        "typescript",
+        "test-automation",
+        "ai",
+        "agentic",
+        "claude-code",
+        "cursor",
+        "github-copilot",
+        "testing",
+        "e2e",
+        "api-testing",
+        "scaffold",
+        "create"
+    ],
+    "author": "Ivan Davidov",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/idavidov13/agentic-playwright.git",
+        "directory": "packages/create-agentic-playwright"
+    },
+    "bugs": {
+        "url": "https://github.com/idavidov13/agentic-playwright/issues"
+    },
+    "homepage": "https://github.com/idavidov13/agentic-playwright#readme",
+    "engines": {
+        "node": ">=20"
+    }
+}
