@@ -1,0 +1,59 @@
+name: Release
+
+# Publishes create-agentic-playwright to npm via trusted publishing (GitHub
+# Actions OIDC) — no long-lived npm token exists anywhere. Configure once on
+# npmjs.com: package Settings -> Trusted Publisher -> GitHub Actions ->
+# repository idavidov13/agentic-playwright, workflow release.yml.
+#
+# Release procedure:
+#   1. Ensure VERSION, package.json (root), CHANGELOG.md, and
+#      packages/create-agentic-playwright/package.json all carry the version.
+#   2. git tag vX.Y.Z && git push origin vX.Y.Z
+
+on:
+    push:
+        tags:
+            - 'v*.*.*'
+
+permissions:
+    contents: read
+    id-token: write # OIDC token for npm provenance
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  registry-url: 'https://registry.npmjs.org'
+
+            # Trusted publishing requires npm >= 11.5.1 (node 20 bundles npm 10)
+            - name: Update npm for OIDC trusted publishing
+              run: npm install -g npm@latest && npm --version
+
+            - name: Verify tag matches package and template versions
+              run: |
+                  TAG="${GITHUB_REF_NAME#v}"
+                  PKG="$(node -p "require('./packages/create-agentic-playwright/package.json').version")"
+                  ROOT="$(tr -d '[:space:]' < VERSION)"
+                  echo "tag=$TAG pkg=$PKG root=$ROOT"
+                  [ "$TAG" = "$PKG" ] || { echo "Tag does not match initializer package.json version"; exit 1; }
+                  [ "$TAG" = "$ROOT" ] || { echo "Tag does not match root VERSION file"; exit 1; }
+
+            - name: Pack and scaffold-verify before publishing
+              run: |
+                  cd packages/create-agentic-playwright
+                  npm pack
+                  mkdir -p /tmp/verify && cd /tmp/verify
+                  tar -xzf "$GITHUB_WORKSPACE"/packages/create-agentic-playwright/create-agentic-playwright-*.tgz
+                  node package/bin/create.js verify-project --demo --skip-install --skip-git
+                  cd verify-project
+                  bash scripts/check-rules-drift.sh
+                  bash scripts/check-skill-crossrefs.sh
+
+            - name: Publish with provenance
+              working-directory: packages/create-agentic-playwright
+              run: npm publish --provenance --access public

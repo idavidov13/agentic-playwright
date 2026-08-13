@@ -1,0 +1,58 @@
+name: Playwright Tests
+
+# The example suite runs against the public demo application
+# (practicesoftwaretesting.com) — the values below are public documentation,
+# not secrets. When you adapt this scaffold to your own application, move
+# real credentials into repository secrets: ${{ secrets.APP_PASSWORD }} etc.
+#
+# Not a required branch check: the suite depends on a third-party demo API,
+# and its downtime should not block merges (skill-lint and the template
+# smoke test are the deterministic gates).
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        env:
+            APP_URL: https://practicesoftwaretesting.com
+            API_URL: https://api.practicesoftwaretesting.com
+            APP_EMAIL: customer@practicesoftwaretesting.com
+            APP_PASSWORD: welcome01
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Write env file from workflow env
+              run: |
+                  mkdir -p env
+                  {
+                    echo "APP_URL=$APP_URL"
+                    echo "API_URL=$API_URL"
+                    echo "APP_EMAIL=$APP_EMAIL"
+                    echo "APP_PASSWORD=$APP_PASSWORD"
+                  } > env/.env.dev
+
+            - name: Install Playwright browser
+              run: npx playwright install --with-deps chromium
+
+            - name: Run Playwright tests
+              run: npx playwright test
+
+            - uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: playwright-report
+                  path: playwright-report/
+                  retention-days: 14
