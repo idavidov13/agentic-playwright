@@ -12,7 +12,8 @@ import { StorageStatePaths } from './enums/app/app';
 const environment = process.env.ENVIRONMENT ?? 'dev';
 const environmentPath = `./env/.env.${environment}`;
 
-dotenv.config({ path: environmentPath });
+// quiet: dotenv v17+ prints promotional "injected env" banners by default
+dotenv.config({ path: environmentPath, quiet: true });
 
 /**
  * Playwright Test Configuration
