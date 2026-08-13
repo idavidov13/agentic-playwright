@@ -35,6 +35,34 @@ const DEMO_ENV = {
     APP_PASSWORD: 'welcome01',
 };
 
+// ---------------------------------------------------------------- branding
+
+const BRAND_ART = String.raw`
+     _             _      ___      _
+    / \   _ __ ___| |__  / _ \    / \
+   / _ \ | '__/ __| '_ \| | | |  / _ \
+  / ___ \| | | (__| | | | |_| | / ___ \
+ /_/   \_\_|  \___|_| |_|\__\_\/_/   \_\
+`
+    .split('\n')
+    .slice(1, -1);
+const BRAND_SUBTITLE = 'Agentic Playwright Test Automation';
+
+/** Prints the ArchQA wordmark; cyan-to-blue fade on TTYs, plain elsewhere. */
+function printBrand() {
+    const useColor = process.stdout.isTTY && !process.env.NO_COLOR;
+    const shades = [51, 45, 39, 33, 27];
+    console.log('');
+    BRAND_ART.forEach((line, i) => {
+        console.log(useColor ? `\x1b[38;5;${shades[i]}m${line}\x1b[0m` : line);
+    });
+    console.log(
+        useColor
+            ? `\n  \x1b[1m${BRAND_SUBTITLE}\x1b[0m\n`
+            : `\n  ${BRAND_SUBTITLE}\n`
+    );
+}
+
 // ---------------------------------------------------------------- utilities
 
 const isWindows = process.platform === 'win32';
@@ -83,6 +111,7 @@ function printHelp() {
         .readFileSync(__filename, 'utf8')
         .split('\n')
         .slice(1, 23)
+        .filter((l) => l !== '/**' && l !== ' */')
         .map((l) => l.replace(/^ \* ?/, ''))
         .join('\n');
     console.log(header);
@@ -183,6 +212,8 @@ const COPILOT_PATHS = [
 
 async function main() {
     const { dir, flags } = parseArgs(process.argv.slice(2));
+
+    printBrand();
 
     if (flags.has('help') || !dir) {
         printHelp();
@@ -368,6 +399,8 @@ async function main() {
 
     // ---- banner ---------------------------------------------------------
     log('\n----------------------------------------------------------------');
+    log(`ArchQA — ${BRAND_SUBTITLE}`);
+    log('----------------------------------------------------------------');
     if (smokeGreen === true) {
         log(`✅ ${projectName} is ready — the smoke test just passed.`);
     } else if (smokeGreen === false) {
