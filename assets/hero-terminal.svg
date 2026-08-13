@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="330" viewBox="0 0 720 330" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">
+  <!-- terminal window -->
+  <rect x="1" y="1" width="718" height="328" rx="12" fill="#0d1117" stroke="#30363d"/>
+  <!-- title bar -->
+  <rect x="1" y="1" width="718" height="36" rx="12" fill="#161b22"/>
+  <rect x="1" y="25" width="718" height="12" fill="#161b22"/>
+  <circle cx="24" cy="19" r="6" fill="#ff5f57"/>
+  <circle cx="44" cy="19" r="6" fill="#febc2e"/>
+  <circle cx="64" cy="19" r="6" fill="#28c840"/>
+  <text x="360" y="24" text-anchor="middle" fill="#8b949e" font-size="12">terminal</text>
+  <!-- content (leading/inner runs of spaces are non-breaking so no renderer collapses them) -->
+  <text x="24" y="66" fill="#8b949e">$&#160;<tspan fill="#e6edf3">npm&#160;create&#160;agentic-playwright&#160;my-tests&#160;--&#160;--demo</tspan></text>
+  <text x="24" y="98" fill="#00ffff">&#160;&#160;&#160;&#160;&#160;_&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_&#160;&#160;&#160;&#160;&#160;&#160;___&#160;&#160;&#160;&#160;&#160;&#160;_</text>
+  <text x="24" y="118" fill="#00d7ff">&#160;&#160;&#160;&#160;/&#160;\&#160;&#160;&#160;_&#160;__&#160;___|&#160;|__&#160;&#160;/&#160;_&#160;\&#160;&#160;&#160;&#160;/&#160;\</text>
+  <text x="24" y="138" fill="#00afff">&#160;&#160;&#160;/&#160;_&#160;\&#160;|&#160;'__/&#160;__|&#160;'_&#160;\|&#160;|&#160;|&#160;|&#160;&#160;/&#160;_&#160;\</text>
+  <text x="24" y="158" fill="#0087ff">&#160;&#160;/&#160;___&#160;\|&#160;|&#160;|&#160;(__|&#160;|&#160;|&#160;|&#160;|_|&#160;|&#160;/&#160;___&#160;\</text>
+  <text x="24" y="178" fill="#005fff">&#160;/_/&#160;&#160;&#160;\_\_|&#160;&#160;\___|_|&#160;|_|\__\_\/_/&#160;&#160;&#160;\_\</text>
+  <text x="24" y="210" fill="#e6edf3" font-weight="bold">&#160;&#160;Agentic&#160;Playwright&#160;Test&#160;Automation</text>
+  <text x="24" y="242" fill="#e6edf3">▶&#160;Running&#160;the&#160;@smoke&#160;verification&#160;test</text>
+  <text x="24" y="266" fill="#3fb950">&#160;&#160;3&#160;passed&#160;(6.0s)</text>
+  <text x="24" y="298" fill="#3fb950">✅&#160;my-tests&#160;is&#160;ready&#160;—&#160;the&#160;smoke&#160;test&#160;just&#160;passed.</text>
+</svg>

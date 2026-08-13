@@ -1,10 +1,82 @@
-# Agentic Playwright
+<p align="center">
+  <img src="assets/hero-terminal.svg" width="720" alt="npm create agentic-playwright — ArchQA banner, smoke test green">
+</p>
 
-> **Stop teaching your AI how to write tests. Hand it the rulebook.**
+<h1 align="center">Agentic Playwright</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Node.js: >=20](https://img.shields.io/badge/Node.js-%3E%3D20-green.svg)](https://nodejs.org/) [![Playwright: ^1.60](https://img.shields.io/badge/Playwright-%5E1.60-orange.svg)](https://playwright.dev/)
+<p align="center">
+  <strong>Stop teaching your AI how to write tests. Hand it the rulebook.</strong>
+</p>
 
-Agentic Playwright is a production-grade Playwright + TypeScript scaffold built for the way teams actually work now: with an AI assistant writing most of the code. You get a complete, running test framework — page objects, API testing with runtime-validated contracts, test data factories, CI — plus a full set of AI rules that Claude Code, Cursor, and GitHub Copilot pick up automatically. Your assistant stops guessing at conventions and starts following yours: the right selectors, the right assertions, no flaky waits, no hardcoded secrets — from the very first prompt.
+<p align="center">
+  <a href="https://www.npmjs.com/package/create-agentic-playwright"><img src="https://img.shields.io/npm/v/create-agentic-playwright?style=flat-square&label=npm" alt="npm"></a>
+  <a href="https://github.com/idavidov13/agentic-playwright/actions/workflows/template-smoke.yml"><img src="https://img.shields.io/github/actions/workflow/status/idavidov13/agentic-playwright/template-smoke.yml?style=flat-square&label=template%20smoke" alt="Template Smoke Test"></a>
+  <img src="https://img.shields.io/badge/works%20with-Claude%20Code%20·%20Cursor%20·%20Copilot-blue?style=flat-square" alt="Works with Claude Code, Cursor, Copilot">
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/node-%3E%3D20-green?style=flat-square" alt="Node >= 20"></a>
+  <a href="https://playwright.dev/"><img src="https://img.shields.io/badge/playwright-%5E1.60-orange?style=flat-square" alt="Playwright ^1.60"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT license"></a>
+</p>
+
+<p align="center">
+  Production-grade Playwright + TypeScript Scaffold for Agentic Testing.<br>
+  A complete, running test framework — page objects, API contracts, data factories, CI —<br>
+  plus the AI rules your assistant picks up automatically, from the very first prompt.
+</p>
+
+## See it
+
+```bash
+npm create agentic-playwright my-tests -- --demo
+```
+
+Zero questions. Scaffolds the framework, installs dependencies and a browser, and ends
+by running the smoke test against a live demo application — **you see green before
+writing a line.** Under 5 minutes on normal broadband.
+
+## Without the rulebook vs with it
+
+The same prompt — _"write a test for the product search"_ — to the same AI assistant:
+
+```ts
+// ❌ Unsupervised: XPath, hard waits, `any`, magic timeouts, no structure
+test('search', async ({ page }) => {
+    await page.goto('https://practicesoftwaretesting.com');
+    await page.locator('//input[@id="search-query"]').fill('pliers');
+    await page.locator('//button[@type="submit"]').click();
+    await page.waitForTimeout(5000);
+    const cards: any = await page.$$('.card');
+    expect(cards.length > 0).toBe(true);
+});
+```
+
+```ts
+// ✅ With Agentic Playwright: fixtures, steps, web-first assertions
+import { expect, test } from '../../../fixtures/pom/test-options';
+
+test(
+    'should show only matching products when searching',
+    { tag: '@regression' },
+    async ({ homePage }) => {
+        await test.step('GIVEN the user is on the home page', async () => {
+            await homePage.open();
+        });
+
+        await test.step('WHEN the user searches for "pliers"', async () => {
+            await homePage.searchFor('pliers');
+        });
+
+        await test.step('THEN every result matches the search term', async () => {
+            await expect(homePage.searchCaption).toContainText('pliers');
+            await expect(homePage.productNames.first()).toContainText('Pliers');
+        });
+    }
+);
+```
+
+Dependency-injected page objects, Given/When/Then steps, web-first assertions, no hard
+waits, no `any`, one tag per test — enforced by a Constitution and 17 skills the
+assistant loads automatically, with a write-time hook that blocks the forbidden
+patterns outright.
 
 _Not affiliated with Microsoft. [Playwright](https://playwright.dev/) is an open-source project by Microsoft; this scaffold builds on it._
 
