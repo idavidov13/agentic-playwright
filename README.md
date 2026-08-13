@@ -25,8 +25,12 @@
 
 ## See it
 
+From the (empty) directory your project should live in — the `.` means "scaffold right
+here, and name the project after this folder" (a fresh `git clone` of an empty repo
+works too). Prefer a new subfolder? Pass a name instead of `.`:
+
 ```bash
-npm create agentic-playwright my-tests -- --demo
+npm create agentic-playwright . -- --demo
 ```
 
 Zero questions. Scaffolds the framework, installs dependencies and a browser, and ends
@@ -145,24 +149,27 @@ _Not affiliated with Microsoft. [Playwright](https://playwright.dev/) is an open
 
 ## Quick Start: npm create
 
-The fastest path — scaffold a fresh project with everything wired:
+The fastest path — scaffold a fresh project with everything wired, straight into the
+directory you are standing in:
 
 ```bash
-npm create agentic-playwright my-tests -- --demo
+npm create agentic-playwright . -- --demo
 ```
 
-`--demo` asks zero questions: it targets the public demo API, installs dependencies and
-the Playwright browser, and finishes by running the smoke test — you see green before
-writing a line. Other modes:
+**Why the `.`?** It scaffolds into the **current directory** and names the project
+after the folder — the natural fit when you have already created (or cloned) an empty
+repo for your tests. The directory must be empty apart from repo bookkeeping like
+`.git`; if a git repo already exists there, the initializer detects it and skips
+`git init`. Prefer a new subfolder instead? Pass a name:
 
 ```bash
-npm create agentic-playwright my-tests            # interactive — 3 questions
-npm create agentic-playwright my-tests -- --bare  # your own app URLs
-npm create agentic-playwright .                   # scaffold into the current directory
+npm create agentic-playwright my-tests -- --demo  # same, but in ./my-tests
+npm create agentic-playwright .                   # interactive — 4 questions
+npm create agentic-playwright . -- --bare         # your own app URLs
 ```
 
-Useful flags: `--no-cursor` / `--no-copilot` (prune AI rule trees you don't use),
-`--yes`, `--skip-install`, `--skip-browsers`, `--skip-git`, `--skip-smoke`.
+Useful flags: `--no-claude` / `--no-cursor` / `--no-copilot` (prune AI rule trees you
+don't use), `--yes`, `--skip-install`, `--skip-browsers`, `--skip-git`, `--skip-smoke`.
 
 ## Quick Start: Dev Container
 

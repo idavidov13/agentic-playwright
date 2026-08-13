@@ -6,19 +6,22 @@ Scaffold a production-grade Playwright + TypeScript test framework with a harnes
 all major AI coding agents baked in — one command, first test run green in minutes.
 
 ```bash
-npm create agentic-playwright my-tests
+npm create agentic-playwright .
 ```
+
+The `.` scaffolds into the current (empty) directory and names the project after the
+folder; pass a name like `my-tests` to create a subfolder instead.
 
 ## Presets
 
 ```bash
-npm create agentic-playwright my-tests -- --demo   # zero questions: demo API, all AI rule trees, smoke run
-npm create agentic-playwright my-tests -- --bare   # your own app URLs, no demo smoke run
-npm create agentic-playwright my-tests             # interactive — 3 questions
-npm create agentic-playwright .                    # scaffold into the current directory
+npm create agentic-playwright . -- --demo          # zero questions: demo API, all AI rule trees, smoke run
+npm create agentic-playwright . -- --bare          # your own app URLs, no demo smoke run
+npm create agentic-playwright .                    # interactive — 4 questions
+npm create agentic-playwright my-tests -- --demo   # same, but into a new ./my-tests subfolder
 ```
 
-Other flags: `--yes`, `--skip-install`, `--skip-browsers`, `--skip-git`, `--skip-smoke`.
+Other flags: `--no-claude` / `--no-cursor` / `--no-copilot`, `--yes`, `--skip-install`, `--skip-browsers`, `--skip-git`, `--skip-smoke`.
 
 ## What you get
 

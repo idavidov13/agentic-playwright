@@ -3,7 +3,7 @@
  * create-agentic-playwright — scaffold a new Agentic Playwright project.
  *
  * Usage:
- *   npm create agentic-playwright my-tests            # interactive (3 questions)
+ *   npm create agentic-playwright my-tests            # interactive (4 questions)
  *   npm create agentic-playwright my-tests -- --demo  # zero questions, demo API, smoke run
  *   npm create agentic-playwright my-tests -- --bare  # your own app URLs, no smoke run
  *   npm create agentic-playwright .                   # scaffold into the current directory
@@ -13,6 +13,7 @@
  *                     all AI rule trees, install deps + browser, run @smoke.
  *   --bare            Prompt for your app's URLs instead of the demo API.
  *   --yes             Accept all defaults for any question not answered by flags.
+ *   --no-claude       Prune the Claude Code rule tree (.claude/, CLAUDE.md).
  *   --no-cursor       Prune the Cursor rule tree (.cursor/).
  *   --no-copilot      Prune the GitHub Copilot rule tree (.github instructions/prompts/skills).
  *   --skip-install    Do not run npm install (implies --skip-browsers, --skip-smoke).
@@ -111,7 +112,7 @@ function printHelp() {
     const header = fs
         .readFileSync(__filename, 'utf8')
         .split('\n')
-        .slice(1, 23)
+        .slice(1, 25)
         .filter((l) => l !== '/**' && l !== ' */')
         .map((l) => l.replace(/^ \* ?/, ''))
         .join('\n');
@@ -201,6 +202,7 @@ function pruneTree(projectDir, relPaths) {
     }
 }
 
+const CLAUDE_PATHS = ['.claude', 'CLAUDE.md'];
 const CURSOR_PATHS = ['.cursor'];
 const COPILOT_PATHS = [
     '.github/instructions',
@@ -248,6 +250,7 @@ async function main() {
     if (demo && bare) fail('--demo and --bare are mutually exclusive.');
 
     // ---- gather answers -------------------------------------------------
+    let keepClaude = !flags.has('no-claude');
     let keepCursor = !flags.has('no-cursor');
     let keepCopilot = !flags.has('no-copilot');
     let env = { ...DEMO_ENV };
@@ -261,20 +264,38 @@ async function main() {
             input: process.stdin,
             output: process.stdout,
         });
+        // If stdin ends (piped input exhausted), fall back to defaults for the
+        // remaining questions instead of exiting mid-scaffold: an unresolved
+        // rl.question() promise would otherwise silently end the process.
+        let rlClosed = false;
+        rl.once('close', () => {
+            rlClosed = true;
+        });
+        const io = {
+            question: (q) =>
+                rlClosed
+                    ? Promise.resolve('')
+                    : Promise.race([
+                          rl.question(q),
+                          new Promise((resolve) =>
+                              rl.once('close', () => resolve(''))
+                          ),
+                      ]),
+        };
         log('\ncreate-agentic-playwright — a few questions (Enter = default):');
 
+        keepClaude =
+            keepClaude &&
+            (await askYesNo(io, '1/4 Include Claude Code rules?', true));
         keepCursor =
             keepCursor &&
-            (await askYesNo(rl, '1/3 Include Cursor rules?', true));
+            (await askYesNo(io, '2/4 Include Cursor rules?', true));
         keepCopilot =
             keepCopilot &&
-            (await askYesNo(rl, '2/3 Include GitHub Copilot rules?', true));
-        log(
-            '    (Claude Code rules always ship — they are the canonical tree.)'
-        );
+            (await askYesNo(io, '3/4 Include GitHub Copilot rules?', true));
 
         if (bare) {
-            log('3/3 Your application under test:');
+            log('4/4 Your application under test:');
             env = {
                 APP_URL: await ask(
                     rl,
@@ -286,13 +307,13 @@ async function main() {
                     '    API_URL',
                     'https://api.your-app.example.com'
                 ),
-                APP_EMAIL: await ask(rl, '    APP_EMAIL', 'user@example.com'),
-                APP_PASSWORD: await ask(rl, '    APP_PASSWORD', 'change-me'),
+                APP_EMAIL: await ask(io, '    APP_EMAIL', 'user@example.com'),
+                APP_PASSWORD: await ask(io, '    APP_PASSWORD', 'change-me'),
             };
         } else {
             const useDemo = await askYesNo(
-                rl,
-                '3/3 Use the public demo API (practicesoftwaretesting.com) so tests run green immediately?',
+                io,
+                '4/4 Use the public demo API (practicesoftwaretesting.com) so tests run green immediately?',
                 true
             );
             if (!useDemo) {
@@ -345,6 +366,13 @@ async function main() {
     writeEnvFile(projectDir, env);
 
     const pruned = [];
+    if (!keepClaude) {
+        pruneTree(projectDir, CLAUDE_PATHS);
+        pruned.push('Claude Code');
+        log(
+            '  Note: pruning Claude Code also removes the write-time enforcement hook (it lives in .claude/).'
+        );
+    }
     if (!keepCursor) {
         pruneTree(projectDir, CURSOR_PATHS);
         pruned.push('Cursor');
@@ -426,7 +454,7 @@ async function main() {
     log('  npx playwright test          # run the example suite');
     log('  npm run check:skills         # verify the AI rule trees');
     log('\nAI assistants pick up their rules automatically:');
-    log('  Claude Code — CLAUDE.md + .claude/skills/');
+    if (keepClaude) log('  Claude Code — CLAUDE.md + .claude/skills/');
     if (keepCursor) log('  Cursor — .cursor/rules/ + .cursor/skills/');
     if (keepCopilot)
         log('  Copilot — .github/copilot-instructions.md + instructions/');

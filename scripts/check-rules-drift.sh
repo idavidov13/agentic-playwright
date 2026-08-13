@@ -20,6 +20,10 @@ SKILLS_DIR="${REPO_ROOT}/.claude/skills"
 CONSTITUTION="${REPO_ROOT}/CLAUDE.md"
 
 if [[ ! -f "${CONSTITUTION}" ]]; then
+    if [[ ! -d "${REPO_ROOT}/.claude" ]]; then
+        echo "SKIP: Claude rule tree not present (pruned at init) — nothing to check."
+        exit 0
+    fi
     echo "ERROR: Constitution not found at ${CONSTITUTION}" >&2
     exit 2
 fi

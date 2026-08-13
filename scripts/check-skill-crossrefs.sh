@@ -27,6 +27,11 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SKILLS_DIR="${REPO_ROOT}/.claude/skills"
 CONSTITUTION="${REPO_ROOT}/CLAUDE.md"
 
+if [[ ! -f "${CONSTITUTION}" && ! -d "${REPO_ROOT}/.claude" ]]; then
+    echo "SKIP: Claude rule tree not present (pruned at init) — nothing to check."
+    exit 0
+fi
+
 # Kebab tokens that are legitimate prose, doc examples, or placeholders --
 # not skill names and not repo paths. Extend deliberately when a new
 # false positive appears.
