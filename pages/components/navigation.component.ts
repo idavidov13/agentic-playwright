@@ -1,7 +1,7 @@
 import { Locator, Page } from '@playwright/test';
 
 /**
- * Component Object for navigation elements.
+ * Component Object for the main navigation bar.
  * Demonstrates the component pattern for reusable UI fragments.
  *
  * Components are smaller, reusable pieces that can be composed into Page Objects.
@@ -10,7 +10,7 @@ import { Locator, Page } from '@playwright/test';
  * @example
  * ```ts
  * // Usage in a Page Object
- * export class DashboardPage {
+ * export class AppPage {
  *     readonly nav: NavigationComponent;
  *
  *     constructor(private readonly page: Page) {
@@ -19,7 +19,7 @@ import { Locator, Page } from '@playwright/test';
  * }
  *
  * // In tests
- * await dashboardPage.nav.clickHome();
+ * await appPage.nav.clickHome();
  * ```
  */
 export class NavigationComponent {
@@ -35,20 +35,26 @@ export class NavigationComponent {
         return this.page.getByRole('link', { name: 'Home' });
     }
 
-    get dashboardLink(): Locator {
-        return this.page.getByRole('link', { name: 'Dashboard' });
+    get contactLink(): Locator {
+        return this.page.getByRole('link', { name: 'Contact' });
     }
 
-    get settingsLink(): Locator {
-        return this.page.getByRole('link', { name: 'Settings' });
+    get categoriesButton(): Locator {
+        return this.page.getByRole('button', { name: 'Categories' });
     }
 
-    get userMenuButton(): Locator {
-        return this.page.getByTestId('user-menu-button');
+    get signInLink(): Locator {
+        return this.page.getByRole('link', { name: 'Sign in' });
     }
 
-    get logoutButton(): Locator {
-        return this.page.getByRole('button', { name: 'Logout' });
+    /** Logged-in user dropdown toggle; shows the user's name. */
+    get userMenu(): Locator {
+        return this.page.getByTestId('nav-menu');
+    }
+
+    /** Sign-out item inside the user dropdown (hidden until the menu opens). */
+    get signOutLink(): Locator {
+        return this.page.getByTestId('nav-sign-out');
     }
 
     // ==================== Actions ====================
@@ -63,39 +69,39 @@ export class NavigationComponent {
     }
 
     /**
-     * Navigates to the dashboard via the navigation link.
+     * Navigates to the contact page via the navigation link.
      *
      * @returns {Promise<void>}
      */
-    async clickDashboard(): Promise<void> {
-        await this.dashboardLink.click();
+    async clickContact(): Promise<void> {
+        await this.contactLink.click();
     }
 
     /**
-     * Navigates to settings via the navigation link.
+     * Opens the product categories dropdown.
      *
      * @returns {Promise<void>}
      */
-    async clickSettings(): Promise<void> {
-        await this.settingsLink.click();
+    async openCategories(): Promise<void> {
+        await this.categoriesButton.click();
     }
 
     /**
-     * Opens the user dropdown menu.
+     * Opens the logged-in user's dropdown menu.
      *
      * @returns {Promise<void>}
      */
     async openUserMenu(): Promise<void> {
-        await this.userMenuButton.click();
+        await this.userMenu.click();
     }
 
     /**
-     * Performs logout by opening user menu and clicking logout.
+     * Signs out by opening the user menu and clicking the sign-out item.
      *
      * @returns {Promise<void>}
      */
-    async logout(): Promise<void> {
+    async signOut(): Promise<void> {
         await this.openUserMenu();
-        await this.logoutButton.click();
+        await this.signOutLink.click();
     }
 }
