@@ -15,6 +15,7 @@ npm create agentic-playwright my-tests
 npm create agentic-playwright my-tests -- --demo   # zero questions: demo API, all AI rule trees, smoke run
 npm create agentic-playwright my-tests -- --bare   # your own app URLs, no demo smoke run
 npm create agentic-playwright my-tests             # interactive — 3 questions
+npm create agentic-playwright .                    # scaffold into the current directory
 ```
 
 Other flags: `--yes`, `--skip-install`, `--skip-browsers`, `--skip-git`, `--skip-smoke`.

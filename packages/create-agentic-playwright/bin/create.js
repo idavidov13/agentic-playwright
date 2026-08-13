@@ -6,6 +6,7 @@
  *   npm create agentic-playwright my-tests            # interactive (3 questions)
  *   npm create agentic-playwright my-tests -- --demo  # zero questions, demo API, smoke run
  *   npm create agentic-playwright my-tests -- --bare  # your own app URLs, no smoke run
+ *   npm create agentic-playwright .                   # scaffold into the current directory
  *
  * Flags:
  *   --demo            Zero questions. Demo API (practicesoftwaretesting.com),
@@ -230,9 +231,16 @@ async function main() {
         .basename(projectDir)
         .toLowerCase()
         .replace(/[^a-z0-9-_.]/g, '-');
-    if (fs.existsSync(projectDir) && fs.readdirSync(projectDir).length > 0) {
-        fail(`Target directory "${dir}" already exists and is not empty.`);
+    // `.` (or any existing dir) is allowed as long as it holds nothing but
+    // repo bookkeeping — a fresh `git clone` of an empty repo qualifies.
+    const IGNORED_ENTRIES = new Set(['.git', '.DS_Store', 'Thumbs.db']);
+    const existingEntries = fs.existsSync(projectDir)
+        ? fs.readdirSync(projectDir).filter((e) => !IGNORED_ENTRIES.has(e))
+        : [];
+    if (existingEntries.length > 0) {
+        fail(`Target directory "${dir}" is not empty.`);
     }
+    const hadGitRepo = fs.existsSync(path.join(projectDir, '.git'));
 
     const demo = flags.has('demo');
     const bare = flags.has('bare');
@@ -350,7 +358,9 @@ async function main() {
     }
 
     // ---- git ------------------------------------------------------------
-    if (doGit) {
+    if (doGit && hadGitRepo) {
+        log('\n  Existing git repository detected — skipping git init/commit.');
+    } else if (doGit) {
         step('Initializing git repository');
         const ok =
             run('git', ['init', '-b', 'main'], projectDir) &&
@@ -411,7 +421,7 @@ async function main() {
         log(`✅ ${projectName} scaffolded.`);
     }
     log('\nNext steps:');
-    log(`  cd ${dir}`);
+    if (dir !== '.') log(`  cd ${dir}`);
     if (!doInstall) log('  npm install && npx playwright install chromium');
     log('  npx playwright test          # run the example suite');
     log('  npm run check:skills         # verify the AI rule trees');

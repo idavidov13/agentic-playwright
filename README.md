@@ -158,6 +158,7 @@ writing a line. Other modes:
 ```bash
 npm create agentic-playwright my-tests            # interactive — 3 questions
 npm create agentic-playwright my-tests -- --bare  # your own app URLs
+npm create agentic-playwright .                   # scaffold into the current directory
 ```
 
 Useful flags: `--no-cursor` / `--no-copilot` (prune AI rule trees you don't use),
