@@ -35,7 +35,7 @@ jobs:
     skill-lint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
 
             - name: Constitution rules -> skill Critical blocks
               run: bash scripts/check-rules-drift.sh
@@ -49,7 +49,7 @@ jobs:
     version-lint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
 
             - name: VERSION <-> package.json <-> CHANGELOG consistency
               run: bash scripts/check-version-drift.sh
