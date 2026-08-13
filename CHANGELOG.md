@@ -4,6 +4,11 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ---
 
+## v1.0.1 -- Silence dotenv v17 Banners -- 2026-08-13
+
+- **dotenv v17 promotional banners silenced.** `dotenv.config()` now passes `quiet: true` — v17 (pulled in via dependency updates) prints "injected env" lines with rotating sponsor ads into every Playwright run.
+- Release workflow runs on Node 24 (`npm@latest` no longer supports Node 20).
+
 ## v1.0.0 -- Initial Public Release -- 2026-08-13
 
 The first public release of **Agentic Playwright** — a production-grade Playwright + TypeScript scaffold for agentic testing, with a harness for all major AI coding agents baked in.

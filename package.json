@@ -1,6 +1,6 @@
 {
     "name": "agentic-playwright",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "private": true,
     "description": "Production-grade Playwright + TypeScript Scaffold for Agentic Testing. Harness for all major AI coding agents baked in.",
     "scripts": {
