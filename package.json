@@ -53,11 +53,11 @@
     "author": "Ivan Davidov",
     "license": "MIT",
     "devDependencies": {
-        "@faker-js/faker": "^10.5.0",
+        "@faker-js/faker": "^10.6.0",
         "@playwright/cli": "^0.1.18",
         "@playwright/test": "^1.62.1",
         "@types/node": "^26.2.0",
-        "@typescript-eslint/eslint-plugin": "^8.66.0",
+        "@typescript-eslint/eslint-plugin": "^8.67.0",
         "@typescript-eslint/parser": "^8.34.1",
         "eslint": "^10.8.1",
         "eslint-config-prettier": "^10.1.5",
