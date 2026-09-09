@@ -41,7 +41,7 @@ writing a line.** Under 5 minutes on normal broadband.
 
 [Debbie O'Brien](https://github.com/debs-obrien) and [Ivan Davidov](https://github.com/idavidov13) will walk through the architecture at C3, "Orchestrating Agentic Test Automation with Playwright". October 21st, online, organized by Packt
 
-[Registrater here]([https://www.eventbrite.co.uk/e/orchestrating-agentic-test-automation-with-playwright-c3-tickets-1998169208893?aff=Ivanc3&discount=ivan40](https://www.eventbrite.co.uk/e/orchestrating-agentic-test-automation-with-playwright-c3-tickets-1998169208893?aff=Ivanc3&discount=ivan30))
+[Registrater here](https://www.eventbrite.co.uk/e/orchestrating-agentic-test-automation-with-playwright-c3-tickets-1998169208893?aff=Ivanc3&discount=ivan30)
 
 ## Without the rulebook vs with it
 
