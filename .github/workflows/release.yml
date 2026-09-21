@@ -55,6 +55,23 @@ jobs:
                   bash scripts/check-rules-drift.sh
                   bash scripts/check-skill-crossrefs.sh
 
+            # A re-pushed tag (or a re-run) must not fail with "cannot publish over
+            # the previously published versions" -- skip the publish instead.
+            - name: Skip publish when this version already exists on npm
+              id: registry
+              working-directory: packages/create-agentic-playwright
+              run: |
+                  NAME="$(node -p "require('./package.json').name")"
+                  VER="$(node -p "require('./package.json').version")"
+                  FOUND="$(npm view "${NAME}@${VER}" version 2>/dev/null || true)"
+                  if [ -n "${FOUND}" ]; then
+                      echo "${NAME}@${VER} is already on npm -- skipping publish."
+                      echo "skip=true" >> "$GITHUB_OUTPUT"
+                  else
+                      echo "skip=false" >> "$GITHUB_OUTPUT"
+                  fi
+
             - name: Publish with provenance
+              if: steps.registry.outputs.skip != 'true'
               working-directory: packages/create-agentic-playwright
               run: npm publish --provenance --access public

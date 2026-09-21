@@ -89,12 +89,12 @@ export const UserResponseSchema = z.strictObject({
 ```typescript
 // FORBIDDEN -- z.object() silently strips unknown keys
 export const Schema = z.object({
-    /* ... */
+    id: z.uuid(),
 });
 
 // CORRECT -- z.strictObject() rejects unknown keys at runtime
 export const Schema = z.strictObject({
-    /* ... */
+    id: z.uuid(),
 });
 ```
 
@@ -132,9 +132,12 @@ import {
     UserResponse,
     UserResponseSchema,
 } from '../../../fixtures/api/schemas/app/userSchema';
+import { ApiEndpoints } from '../../../enums/app/app';
 
 const { status, body } = await apiRequest<UserResponse>({
-    /* ... */
+    method: 'GET',
+    url: ApiEndpoints.CURRENT_USER,
+    baseUrl: process.env.API_URL,
 });
 
 expect(status).toBe(200);

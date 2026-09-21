@@ -4,6 +4,13 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ---
 
+## v1.0.2 -- Template Payload Excludes Repo-Only CI -- 2026-09-21
+
+- **Scaffolded projects no longer inherit repo-only CI.** `prepack.js` now excludes `.github/workflows/template-smoke.yml`, `.github/workflows/release.yml`, and `.github/FUNDING.yml` from the bundled template. Projects created with 1.0.1 shipped the template smoke workflow, which fails on every push because it expects `packages/create-agentic-playwright/` — delete those two workflow files in an existing project to fix it.
+- **New `Lint` workflow** (`.github/workflows/lint.yml`) runs `tsc`, ESLint, and Prettier on the repository itself, so formatting drift from web-UI edits fails with an obvious name. Ships with scaffolded projects too. The generated `packages/create-agentic-playwright/template/` directory is now excluded from `tsconfig.json` and ESLint, so a local `npm pack` no longer doubles the lint surface.
+- **Release workflow is idempotent.** Re-pushing an already-published tag skips `npm publish` instead of failing with "cannot publish over the previously published versions".
+- **Prettier-version-agnostic skill examples.** `type-safety` code fences no longer use `{ /* ... */ }` object bodies, which Prettier 3.8 and 3.9 format differently and would have broken the template smoke gate on the next Prettier bump.
+
 ## v1.0.1 -- Silence dotenv v17 Banners -- 2026-08-13
 
 - **dotenv v17 promotional banners silenced.** `dotenv.config()` now passes `quiet: true` — v17 (pulled in via dependency updates) prints "injected env" lines with rotating sponsor ads into every Playwright run.
