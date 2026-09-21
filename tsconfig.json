@@ -17,5 +17,11 @@
         "types": ["node"]
     },
     "include": ["*.ts", "**/*.ts", "**/*.mts"],
-    "exclude": ["node_modules", "dist", "playwright-report", "test-results"]
+    "exclude": [
+        "node_modules",
+        "dist",
+        "playwright-report",
+        "test-results",
+        "packages/create-agentic-playwright/template"
+    ]
 }

@@ -34,6 +34,12 @@ const EXCLUDE_FILES = new Set([
     'SECURITY.md',
     '.github/PULL_REQUEST_TEMPLATE.md',
     '.github/dependabot.yml',
+    // Repo-only CI: the smoke test packs the initializer (packages/ is excluded
+    // above) and the release publishes it to npm -- neither applies to a
+    // generated project.
+    '.github/workflows/template-smoke.yml',
+    '.github/workflows/release.yml',
+    '.github/FUNDING.yml', // author sponsorship link
 ]);
 
 function isExcluded(rel) {

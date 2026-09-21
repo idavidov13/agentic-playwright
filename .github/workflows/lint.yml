@@ -1,0 +1,34 @@
+name: Lint
+
+# Deterministic quality gate on the repository itself: TypeScript, ESLint,
+# and Prettier. Edits made outside the husky hook (GitHub web UI, Dependabot)
+# fail here with an obvious name instead of surfacing indirectly inside the
+# generated-project checks of the template smoke test.
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: actions/setup-node@v7
+              with:
+                  node-version: 20
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: TypeScript
+              run: npx tsc --noEmit
+
+            - name: ESLint
+              run: npx eslint .
+
+            - name: Prettier
+              run: npx prettier --check .
