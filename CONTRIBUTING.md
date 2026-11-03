@@ -4,7 +4,7 @@ Thanks for your interest in improving Agentic Playwright!
 
 ## Before you start
 
-This repository is unusual in one important way: **the AI rule trees are part of the product.** The Constitution (`CLAUDE.md`), the skills (`.claude/skills/`), and their mirrors for Cursor (`.cursor/`) and GitHub Copilot (`.github/`) define how AI coding agents behave inside a generated project. Changes to code and changes to rules usually travel together.
+This repository is unusual in one important way: **the AI rule trees are part of the product.** The Constitution (`AGENTS.md`), the skills (`.claude/skills/`) and their generated copy for Codex, Cursor and GitHub Copilot (`.agents/skills/`) define how AI coding agents behave inside a generated project. Changes to code and changes to rules usually travel together.
 
 That means contributions are checked by more gates than a typical repo:
 
@@ -24,8 +24,8 @@ npx playwright test        # requires env/.env.dev — see README "Environment V
 
 ## Ground rules for changes
 
-- **Follow the Constitution.** The rules in `CLAUDE.md` apply to contributed test code too: fixtures over manual instantiation, web-first assertions, no hard waits, no `any`, `z.strictObject()` for API schemas, one tag per test.
-- **Rules and mirrors move together.** If you change a skill under `.claude/skills/`, update the matching `.cursor/` and `.github/` files in the same PR.
+- **Follow the Constitution.** The rules in `AGENTS.md` apply to contributed test code too: fixtures over manual instantiation, web-first assertions, no hard waits, no `any`, `z.strictObject()` for API schemas, one tag per test.
+- **Edit the canonical tree only.** Change a skill under `.claude/skills/`, run `npm run skills:sync`, and commit both trees; `npm run check:skills` fails otherwise.
 - **Vendored skills are off-limits for direct edits.** `skill-creator` and `playwright-cli` are tracked in `skills-lock.json` and synced from upstream; local edits get overwritten. Open an issue instead.
 - **New behavior needs an example.** A new pattern (fixture type, data tier, selector rule) should come with a small example file demonstrating it.
 

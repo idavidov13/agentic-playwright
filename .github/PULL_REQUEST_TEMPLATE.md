@@ -9,7 +9,7 @@
 ## Checklist
 
 - [ ] `npx tsc --noEmit`, `npx eslint .`, `npx prettier --check .` all pass
-- [ ] `npm run lint:skills` and `npm run check:version` pass
+- [ ] `npm run check:skills` and `npm run check:version` pass
 - [ ] Affected Playwright tests run green (`npx playwright test <file>`)
-- [ ] Skill changes (if any) are mirrored in `.claude/`, `.cursor/`, and `.github/`
+- [ ] Skill changes (if any) are made under `.claude/skills/`, then `npm run skills:sync`
 - [ ] Commits are signed off (`git commit -s`, DCO)

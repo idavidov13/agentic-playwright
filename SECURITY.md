@@ -15,4 +15,4 @@ Please include a description of the issue, steps to reproduce, and the affected 
 ## Scope notes
 
 - This scaffold intentionally reads credentials from `process.env.*` and never commits them; `env/.env.*` files (except `env/.env.example`) are git-ignored. If you find a path where a secret could end up tracked, that is in scope.
-- The AI rule trees (`.claude/`, `.cursor/`, `.github/`) instruct coding agents. Prompt-injection vectors that could cause an agent following these rules to exfiltrate secrets or run destructive commands are in scope.
+- The AI rule trees (`AGENTS.md`, `.claude/`, `.agents/`, `.github/prompts/`) instruct coding agents. Prompt-injection vectors that could cause an agent following these rules to exfiltrate secrets or run destructive commands are in scope.
