@@ -52,7 +52,13 @@ jobs:
                   tar -xzf "$GITHUB_WORKSPACE"/packages/create-agentic-playwright/create-agentic-playwright-*.tgz
                   node package/bin/create.js verify-project --demo --skip-install --skip-git
                   cd verify-project
+                  bash scripts/check-agents-md.sh
+                  bash scripts/check-skills-sync.sh
+                  bash scripts/check-skill-shape.sh
+                  bash scripts/sync-upstream-skills.sh verify
                   bash scripts/check-rules-drift.sh
+                  bash scripts/check-skill-references-drift.sh
+                  bash scripts/check-heading-pointers.sh
                   bash scripts/check-skill-crossrefs.sh
 
             # A re-pushed tag (or a re-run) must not fail with "cannot publish over
