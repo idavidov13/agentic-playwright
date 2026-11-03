@@ -4,6 +4,22 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ---
 
+## v2.0.1 -- Two AI Flags, Clearer Commands -- 2026-11-03
+
+### Initializer
+
+- **Two AI flags: Claude Code or the other agents.** `--no-claude` leaves out `.claude/` and `CLAUDE.md`; `--no-agents` now leaves out `.agents/` **and** `.github/prompts/` (Codex, Cursor, GitHub Copilot, ...). `--no-copilot` and `--no-cursor` are deprecated: still accepted, they print a note and prune nothing. The interactive setup asks three questions (was four).
+- **A forgotten `--` still works.** `npm create agentic-playwright . --demo` used to lose `--demo` to npm and start the interactive setup; the initializer now reads the flags npm kept back (`npm_config_*`), applies them and shows the command with `--`. npm warns this form will stop working in its next major version, so the docs keep the `--`.
+- `--help` exits 0 (it exited 1 without a folder). `--bare --yes` is the documented no-questions form for your own app; `--yes` alone is unchanged.
+- Every prompt goes through the input-closed guard: piped input that ends early no longer fails at the URL prompts.
+
+### Docs
+
+- Every command uses `@latest`: without it, `npm create` can reuse an older initializer from the npx cache. The package README and the README quick start show the commands as a table with a line on what the `--` does.
+- `template-smoke.yml` scaffolds the agents-pruned variant with `--no-agents` alone.
+
+---
+
 ## v2.0.0 -- One Orchestrator, One Skill Tree, Every AI Tool -- 2026-11-02
 
 ### Rules layer (BREAKING: the project layout changes)
