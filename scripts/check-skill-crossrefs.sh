@@ -2,22 +2,27 @@
 # check-skill-crossrefs.sh
 #
 # Lints the orchestration layer's cross-skill wiring -- the gaps not covered
-# by the two sibling linters (check-rules-drift.sh validates Constitution
-# rules against Critical blocks; check-skill-references-drift.sh validates
-# references/*.md pointers). This script catches three failure modes:
+# by the sibling linters (check-rules-drift.sh validates Constitution rules
+# against Critical blocks; check-skill-references-drift.sh validates
+# references/*.md pointers; check-agents-md.sh keeps the AGENTS.md Skills
+# Index in sync with .claude/skills/). This script catches two failure modes:
 #
-#   1. Index drift      -- a skill dir exists under .claude/skills/ but is
-#                          missing from the CLAUDE.md Skills Index, or the
-#                          index lists a skill with no dir on disk.
-#   2. Frontmatter drift -- SKILL.md frontmatter `name:` does not match its
+#   1. Frontmatter drift -- SKILL.md frontmatter `name:` does not match its
 #                          directory name, or `description:` is missing/empty.
-#   3. Dangling skill ref -- a backticked kebab-case token in a SKILL.md or
-#                          CLAUDE.md names a skill that does not exist
-#                          (typically left behind by a rename/delete).
+#   2. Dangling skill ref -- a backticked kebab-case token in AGENTS.md,
+#                          CLAUDE.md, the Copilot prompt, a SKILL.md or a
+#                          scaffold skill's references/*.md names a skill
+#                          that does not exist (typically left behind by a
+#                          rename/delete).
+#   3. Dangling skill-context ref -- any backticked token, single words
+#                          included, written as a skill ("see `x`",
+#                          "per `x`", "`x` skill") must name a skill.
 #
-# For mode 3, a token is considered resolved if it (a) names an existing
-# skill, (b) appears in the static allowlist below, or (c) matches a
-# git-tracked file path (e.g. `test-options` -> fixtures/pom/test-options.ts).
+# For mode 2, a token is considered resolved if it (a) names an existing
+# skill, (b) appears in the static allowlist below, or (c) equals the
+# basename (with or without extension) or a whole segment of a git-tracked
+# path (`test-options` -> fixtures/pom/test-options.ts; a substring match
+# used to accept `page-object` via page-object-fixture.ts).
 #
 # Exits non-zero on any drift so CI can gate.
 
@@ -25,7 +30,9 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SKILLS_DIR="${REPO_ROOT}/.claude/skills"
-CONSTITUTION="${REPO_ROOT}/CLAUDE.md"
+# Claude tree pruned at init (--no-claude): lint the generated copy instead.
+[[ -d "${SKILLS_DIR}" ]] || SKILLS_DIR="${REPO_ROOT}/.agents/skills"
+CONSTITUTION="${REPO_ROOT}/AGENTS.md"
 
 if [[ ! -f "${CONSTITUTION}" && ! -d "${REPO_ROOT}/.claude" ]]; then
     echo "SKIP: Claude rule tree not present (pruned at init) — nothing to check."
@@ -47,6 +54,12 @@ ALLOWLIST=(
     "research-helper"   # worked example name in skill-creator
     "research-helper-v2" # worked example name in skill-creator
     "front-chromium"    # Playwright project-name example (pr-reviewer skill)
+    "setup-api"         # Playwright project name (playwright.config.ts)
+    "setup-ui"          # Playwright project name (playwright.config.ts)
+    "webmcp-list"       # playwright-cli subcommand (vendored playwright-cli skill, 0.1.22+)
+    "aria-label"        # HTML attribute (selectors reference)
+    "data-test"         # test-id attribute name (selectors reference)
+    "pr-review-tsc-detour" # anchor id inside the Copilot prompt
 )
 
 errors=0
@@ -57,31 +70,7 @@ while IFS= read -r skill_md; do
     disk_skills="${disk_skills}$(basename "$(dirname "${skill_md}")")"$'\n'
 done < <(find "${SKILLS_DIR}" -mindepth 2 -maxdepth 2 -name SKILL.md -type f | sort)
 
-# --- Collect skills listed in the CLAUDE.md Skills Index table ---
-index_skills="$(awk '/^## Skills Index/ { in_sec = 1; next }
-                     in_sec && /^## /   { in_sec = 0 }
-                     in_sec             { print }' "${CONSTITUTION}" \
-    | grep -oE '^\| `[a-z0-9-]+`' \
-    | grep -oE '[a-z0-9-]+' || true)"
-
-# --- Check 1: index <-> disk sync (both directions) ---
-while IFS= read -r name; do
-    [[ -z "${name}" ]] && continue
-    if ! printf '%s' "${disk_skills}" | grep -F -x -q -- "${name}"; then
-        echo "DRIFT index :: \`${name}\` listed in CLAUDE.md Skills Index but .claude/skills/${name}/SKILL.md is missing"
-        errors=$((errors + 1))
-    fi
-done <<< "${index_skills}"
-
-while IFS= read -r name; do
-    [[ -z "${name}" ]] && continue
-    if ! printf '%s\n' "${index_skills}" | grep -F -x -q -- "${name}"; then
-        echo "DRIFT index :: .claude/skills/${name}/ exists but is missing from the CLAUDE.md Skills Index"
-        errors=$((errors + 1))
-    fi
-done <<< "${disk_skills}"
-
-# --- Check 2: frontmatter name/description per SKILL.md ---
+# --- Check 1: frontmatter name/description per SKILL.md ---
 frontmatter_field() {
     # Print the value of a frontmatter field ($2) from file $1.
     awk -v field="$2" '
@@ -108,7 +97,7 @@ while IFS= read -r name; do
     fi
 done <<< "${disk_skills}"
 
-# --- Check 3: dangling backticked skill-shaped tokens ---
+# --- Check 2: dangling backticked skill-shaped tokens ---
 in_allowlist() {
     local token="$1" allowed
     for allowed in "${ALLOWLIST[@]}"; do
@@ -117,9 +106,24 @@ in_allowlist() {
     return 1
 }
 
+# Tracked basenames (with and without extension) and path segments, once.
+# Outside a git checkout (`--skip-git`), or in a fresh `git init` with nothing
+# added yet (ls-files succeeds but lists nothing), every file except node_modules.
+file_list="$(git -C "${REPO_ROOT}" ls-files 2>/dev/null || true)"
+if [[ -z "${file_list}" ]]; then
+    file_list="$(cd "${REPO_ROOT}" && find . -type f -not -path './node_modules/*' -not -path './.git/*' | sed 's|^\./||')"
+fi
+tracked_names="$(printf '%s\n' "${file_list}" | awk -F/ '
+    { for (i = 1; i <= NF; i++) { print $i; seg = $i; sub(/\.[A-Za-z0-9]+$/, "", seg); print seg } }' | sort -u)"
+
+is_tracked_name() {
+    printf '%s\n' "${tracked_names}" | grep -F -x -q -- "$1"
+}
+
 checked_tokens=0
 check_tokens_in() {
     local file="$1" display="$2" token
+    # 2. kebab-case tokens anywhere in the file
     while IFS= read -r token; do
         [[ -z "${token}" ]] && continue
         checked_tokens=$((checked_tokens + 1))
@@ -129,18 +133,44 @@ check_tokens_in() {
         if in_allowlist "${token}"; then
             continue
         fi
-        if git -C "${REPO_ROOT}" ls-files -- "*${token}*" | grep -q .; then
+        if is_tracked_name "${token}"; then
             continue
         fi
-        echo "DRIFT crossref :: ${display} mentions \`${token}\` -- not a skill, not allowlisted, no matching repo file"
+        echo "DRIFT crossref :: ${display} mentions \`${token}\` -- not a skill, not allowlisted, no tracked file or directory of that name"
         errors=$((errors + 1))
     done < <(grep -oE '`[a-z0-9]+(-[a-z0-9]+)+`' "${file}" | tr -d '\`' | sort -u)
+    # 3. any token written as a skill ("see `x`", "per `x`", "`x` skill")
+    while IFS= read -r token; do
+        [[ -z "${token}" ]] && continue
+        checked_tokens=$((checked_tokens + 1))
+        if printf '%s' "${disk_skills}" | grep -F -x -q -- "${token}"; then
+            continue
+        fi
+        echo "DRIFT crossref :: ${display} refers to \`${token}\` as a skill -- no such skill"
+        errors=$((errors + 1))
+    done < <(grep -oE '(see|per) `[a-z0-9-]+`|`[a-z0-9-]+` skill' "${file}" | grep -oE '`[a-z0-9-]+`' | tr -d '\`' | sort -u)
 }
 
-check_tokens_in "${CONSTITUTION}" "CLAUDE.md"
+# Vendored skills (skills-lock.json) are upstream text: their references are
+# not scanned (their SKILL.md still is, for the index and frontmatter).
+vendored_skills="$(node -e "
+    const lock = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8'));
+    console.log(Object.keys(lock.skills || {}).join('\n'));
+" "${REPO_ROOT}/skills-lock.json" 2>/dev/null || true)"
+is_vendored() { printf '%s\n' "${vendored_skills}" | grep -F -x -q -- "$1"; }
+
+check_tokens_in "${CONSTITUTION}" "AGENTS.md"
+[[ -f "${REPO_ROOT}/CLAUDE.md" ]] && check_tokens_in "${REPO_ROOT}/CLAUDE.md" "CLAUDE.md"
+[[ -f "${REPO_ROOT}/.github/prompts/pr-reviewer.prompt.md" ]] \
+    && check_tokens_in "${REPO_ROOT}/.github/prompts/pr-reviewer.prompt.md" ".github/prompts/pr-reviewer.prompt.md"
 while IFS= read -r name; do
     [[ -z "${name}" ]] && continue
     check_tokens_in "${SKILLS_DIR}/${name}/SKILL.md" "${name}/SKILL.md"
+    is_vendored "${name}" && continue
+    while IFS= read -r ref; do
+        [[ -z "${ref}" ]] && continue
+        check_tokens_in "${ref}" "${name}/${ref#"${SKILLS_DIR}/${name}/"}"
+    done < <(find "${SKILLS_DIR}/${name}/references" -name '*.md' -type f 2>/dev/null | sort)
 done <<< "${disk_skills}"
 
 skill_count="$(printf '%s' "${disk_skills}" | grep -c . || true)"

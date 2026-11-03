@@ -1,15 +1,46 @@
+# husky runs this file with `sh -e`; `set -e` keeps "any failing gate
+# aborts the commit" true when it is run directly (core.hooksPath=.husky).
+set -e
+
 npx lint-staged
 
-# Skill-rules + skill-references drift gates run only when files in any of the
-# three rule trees are staged, so they don't slow unrelated commits.
-if git diff --cached --name-only --diff-filter=ACMR \
-    | grep -qE '^(\.claude/skills/|\.cursor/skills/|\.github/instructions/|\.github/skills/)'; then
-    npm run --silent check:skills-drift
-    npm run --silent check:skills-references
+# Every gate below reads a known set of files; it runs only when one of
+# them is staged (added, modified, copied, renamed or deleted: a deleted
+# skill file must trigger its gates too, and a rename lists both names), so
+# a commit that touches none of them pays for lint-staged alone.
+# The gates read the working tree, not the index: stage the whole change.
+# The same gates run unconditionally in CI (.github/workflows/skill-lint.yml)
+# and in `npm run check:skills`.
+staged="$(git diff --cached --name-only --no-renames --diff-filter=ACMRD)"
+touches() { printf '%s\n' "$staged" | grep -qE "$1"; }
+
+# Constitution scan over the staged TypeScript and static data (a JSON file
+# under test-data/static/ is itself a violation): the hook's rules on the files
+# as they are, so every AI tool (and every human commit) meets them at commit
+# time, not only Claude Code at write time. Paths travel NUL-delimited, so a
+# name with spaces reaches the scanner whole. Deletions are excluded (ACMR).
+if [ -f .claude/scripts/enforce_constitution.py ] \
+    && [ -n "$(git diff --cached --name-only --no-renames --diff-filter=ACMR -- '*.ts' 'test-data/static/*.json')" ]; then
+    git diff --cached -z --name-only --no-renames --diff-filter=ACMR -- '*.ts' 'test-data/static/*.json' \
+        | xargs -0 python3 .claude/scripts/enforce_constitution.py --scan
 fi
 
-# Version-drift gate: only when a version surface is staged.
-if git diff --cached --name-only --diff-filter=ACMR \
-    | grep -qE '^(VERSION|package\.json|CHANGELOG\.md)$'; then
+# Rule layer: the orchestrator, the Claude Code importer, the canonical and
+# generated skill trees, the workflow map, the Copilot prompt, the rule
+# manifest, the vendored-skill lock, the Constitution hook (its rule ids are
+# checked by check:skills-drift), and the scripts that gate or generate them.
+if touches '^(AGENTS\.md$|CLAUDE\.md$|AI-WORKFLOWS\.md$|\.claude/skills/|\.agents/skills/|\.github/prompts/|skills-lock\.json$|\.claude/scripts/enforce_constitution\.py$|scripts/rules-manifest\.txt$|scripts/(check-agents-md|check-skills-sync|sync-skills|check-skill-shape|sync-upstream-skills|check-rules-drift|check-skill-references-drift|check-heading-pointers|check-skill-crossrefs)\.sh$)'; then
+    npm run --silent check:agents-md
+    npm run --silent check:skills-sync
+    npm run --silent check:skills-shape
+    npm run --silent skills:verify
+    npm run --silent check:skills-drift
+    npm run --silent check:skills-references
+    npm run --silent check:skills-headings
+    npm run --silent check:skills-crossrefs
+fi
+
+# Version surfaces.
+if touches '^(VERSION|package\.json|package-lock\.json|CHANGELOG\.md)$'; then
     npm run --silent check:version
 fi

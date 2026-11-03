@@ -1,4 +1,6 @@
 import { test as base } from '@playwright/test';
+import { z } from 'zod/v4';
+import type { output as zOutput } from 'zod/v4';
 import { apiRequest } from '../api/plain-function';
 
 /**
@@ -16,7 +18,8 @@ import { apiRequest } from '../api/plain-function';
  *   3. Teardown code (after `use()`) runs AFTER the test, even on failure
  *
  * WHEN TO CREATE A HELPER FIXTURE:
- * - The same multi-step setup/teardown is copy-pasted across 3+ test files
+ * - The same multi-step setup/teardown is copy-pasted widely enough to clear
+ *   the promotion threshold (api-testing skill Critical, canonical)
  * - Complex preconditions require multiple API calls in sequence
  * - Guaranteed teardown is critical (e.g., deleting test users, revoking tokens)
  *
@@ -52,13 +55,21 @@ import { apiRequest } from '../api/plain-function';
 // ==================== Types ====================
 
 /**
- * Example resource type -- replace with your actual API response type
- * or use `zOutput<typeof YourSchema>` for Zod-inferred types.
+ * Example response schema -- for a real fixture this belongs in
+ * `fixtures/api/schemas/{area}/`, built from the documented API contract.
+ * Responses are validated with `.parse()`, never cast with `as`.
  */
-type ResourceResponse = {
-    id: string;
-    name: string;
-};
+const ResourceResponseSchema = z.strictObject({
+    id: z.string(),
+    name: z.string(),
+});
+type ResourceResponse = zOutput<typeof ResourceResponseSchema>;
+
+/**
+ * Example endpoint path -- for a real fixture this belongs in
+ * `enums/{area}/*` (`ApiEndpoints`), never as an inline literal.
+ */
+const EXAMPLE_RESOURCE_ENDPOINT = '/api/resources';
 
 /**
  * Helper fixture type definitions.
@@ -86,16 +97,20 @@ export const test = base.extend<HelperFixtures>({
      */
     createdResource: async ({ request }, use) => {
         // ── SETUP: Runs before the test ──────────────────────────────
+        // Date.now() only reduces the odds of a name collision (same-ms runs
+        // across parallel workers can still collide) — a real fixture should
+        // generate its data with a Faker factory (test-data/factories/{area}/).
         const { body } = await apiRequest({
             request,
             method: 'POST',
-            url: '/api/resources',
+            url: EXAMPLE_RESOURCE_ENDPOINT,
             baseUrl: process.env.API_URL,
             headers: process.env.ACCESS_TOKEN,
             body: { name: `test-resource-${Date.now()}` },
         });
 
-        const resource = body as ResourceResponse;
+        // Validate, don't cast -- a shape mismatch fails here, not mid-test.
+        const resource = ResourceResponseSchema.parse(body);
 
         // ── YIELD: Passes data to the test ───────────────────────────
         await use(resource);
@@ -104,7 +119,7 @@ export const test = base.extend<HelperFixtures>({
         await apiRequest({
             request,
             method: 'DELETE',
-            url: `/api/resources/${resource.id}`,
+            url: `${EXAMPLE_RESOURCE_ENDPOINT}/${resource.id}`,
             baseUrl: process.env.API_URL,
             headers: process.env.ACCESS_TOKEN,
         });

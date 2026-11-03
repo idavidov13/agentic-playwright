@@ -5,6 +5,6 @@
  * For API endpoints, use enums from `enums/` folder.
  */
 export const utilityConfig = {
-    /** Utility service base URL */
-    baseUrl: process.env.UTILITY_URL,
+    /** Utility service base URL — from `process.env.UTILITY_URL` (declared in `env/.env.example`). */
+    baseUrl: process.env.UTILITY_URL!,
 };

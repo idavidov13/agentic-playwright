@@ -8,11 +8,11 @@ assignees: ''
 
 ## Which agent
 
-<!-- Claude Code / Cursor / GitHub Copilot / other (+ model if known) -->
+<!-- Claude Code / Codex / Cursor / GitHub Copilot / other (+ model if known) -->
 
 ## Which rule
 
-<!-- File + section, e.g. CLAUDE.md "No Hard Waits", or .claude/skills/selectors/SKILL.md -->
+<!-- File + section, e.g. AGENTS.md "No Hard Waits", or .claude/skills/selectors/SKILL.md -->
 
 ## What the agent did
 

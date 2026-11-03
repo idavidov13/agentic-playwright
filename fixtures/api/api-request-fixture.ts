@@ -1,4 +1,5 @@
 import { test as base } from '@playwright/test';
+import { loadUserAccessToken } from '../../helpers/app/createStorageState';
 import { apiRequest as apiRequestOriginal } from './plain-function';
 import {
     ApiRequestFn,
@@ -7,7 +8,24 @@ import {
     ApiRequestResponse,
 } from './api-types';
 
-export const test = base.extend<ApiRequestMethods>({
+/**
+ * Worker-scoped fixtures of the API layer.
+ * `accessTokenLoaded` runs once per worker process before any test and
+ * publishes the token minted by the `setup-api` project as `process.env.ACCESS_TOKEN`.
+ */
+type ApiWorkerFixtures = {
+    accessTokenLoaded: void;
+};
+
+export const test = base.extend<ApiRequestMethods, ApiWorkerFixtures>({
+    accessTokenLoaded: [
+        async ({}, use): Promise<void> => {
+            loadUserAccessToken();
+            await use();
+        },
+        { scope: 'worker', auto: true },
+    ],
+
     /**
      * Provides a function to make API requests.
      * Uses the Playwright request context for HTTP calls.

@@ -2,13 +2,12 @@
 // Cross-platform installer for @playwright/cli's bundled Chromium.
 // Bash equivalent: scripts/install-playwright-cli-browsers.sh
 //
-// LOCAL machines: installs to the default Playwright browser directory so
-// `playwright-cli` works directly — no wrapper, no custom env var.
-//
-// DEV CONTAINER (DEVCONTAINER=true): installs to an isolated cache
-// (PLAYWRIGHT_CLI_BROWSERS_PATH or ~/.cache/playwright-cli-browsers)
-// because the container sets PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-// globally and that path is read-only (baked into the Docker image).
+// Installs into the cache the wrappers read (scripts/playwright-cli.sh and
+// .cmd): PLAYWRIGHT_CLI_BROWSERS_PATH, else ~/.cache/playwright-cli-browsers,
+// on every machine. The CLI's Playwright differs from the test runner's, and
+// in the Dev Container PLAYWRIGHT_BROWSERS_PATH=/ms-playwright is read-only.
+// (Before 3.0.1 a local run installed to Playwright's default location, which
+// the wrappers never read: "Browser chromium not installed".)
 const { execFileSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -63,48 +62,26 @@ if (!cliPw) {
     process.exit(0);
 }
 
-const inContainer = process.env.DEVCONTAINER === 'true';
-const browsersPath = inContainer
-    ? process.env.PLAYWRIGHT_CLI_BROWSERS_PATH ||
-      path.join(os.homedir(), '.cache', 'playwright-cli-browsers')
-    : undefined;
+const browsersPath =
+    process.env.PLAYWRIGHT_CLI_BROWSERS_PATH ||
+    path.join(os.homedir(), '.cache', 'playwright-cli-browsers');
+fs.mkdirSync(browsersPath, { recursive: true });
+const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: browsersPath };
 
-const env = { ...process.env };
-if (browsersPath) {
-    fs.mkdirSync(browsersPath, { recursive: true });
-    env.PLAYWRIGHT_BROWSERS_PATH = browsersPath;
-} else {
-    delete env.PLAYWRIGHT_BROWSERS_PATH;
-}
-
-const displayPath = browsersPath || '(default Playwright location)';
 const pkg = JSON.parse(
     fs.readFileSync(path.join(cliPw, 'package.json'), 'utf8')
 );
-
-if (browsersPath) {
-    const marker = path.join(browsersPath, `.pw-cli-browsers.${pkg.version}`);
-    if (fs.existsSync(marker)) {
-        console.log(
-            `playwright-cli browsers already cached for Playwright ${pkg.version} at ${browsersPath} — skipping download.`
-        );
-        process.exit(0);
-    }
-
+const marker = path.join(browsersPath, `.pw-cli-browsers.${pkg.version}`);
+if (fs.existsSync(marker)) {
     console.log(
-        `Installing Chromium for playwright-cli into ${browsersPath} ...`
+        `playwright-cli browsers already cached for Playwright ${pkg.version} at ${browsersPath} — skipping download.`
     );
-    execFileSync('node', [path.join(cliPw, 'cli.js'), 'install', 'chromium'], {
-        stdio: 'inherit',
-        env,
-    });
-    fs.writeFileSync(marker, '');
-} else {
-    console.log(
-        `Installing Chromium for playwright-cli ${pkg.version} into ${displayPath} ...`
-    );
-    execFileSync('node', [path.join(cliPw, 'cli.js'), 'install', 'chromium'], {
-        stdio: 'inherit',
-        env,
-    });
+    process.exit(0);
 }
+
+console.log(`Installing Chromium for playwright-cli into ${browsersPath} ...`);
+execFileSync('node', [path.join(cliPw, 'cli.js'), 'install', 'chromium'], {
+    stdio: 'inherit',
+    env,
+});
+fs.writeFileSync(marker, '');

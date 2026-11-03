@@ -15,21 +15,24 @@ folder; pass a name like `my-tests` to create a subfolder instead.
 ## Presets
 
 ```bash
-npm create agentic-playwright . -- --demo          # zero questions: demo API, all AI rule trees, smoke run
+npm create agentic-playwright . -- --demo          # zero questions: demo API, every AI tool's rules, smoke run
 npm create agentic-playwright . -- --bare          # your own app URLs, no demo smoke run
 npm create agentic-playwright .                    # interactive — 4 questions
 npm create agentic-playwright my-tests -- --demo   # same, but into a new ./my-tests subfolder
 ```
 
-Other flags: `--no-claude` / `--no-cursor` / `--no-copilot`, `--yes`, `--skip-install`, `--skip-browsers`, `--skip-git`, `--skip-smoke`.
+Other flags: `--no-claude` / `--no-agents` / `--no-copilot` (at least one skill tree always stays), `--yes`, `--skip-install`, `--skip-browsers`, `--skip-git`, `--skip-smoke`.
 
 ## What you get
 
 - **Scaffold core** — dependency-injected page objects, API testing with runtime-validated
   Zod contracts, Faker + Zod data factories, enums as the single source of truth.
-- **AI harness** — a Constitution plus 17 detailed skills for Claude Code, with parallel
-  rule trees for Cursor and GitHub Copilot (pruned at init if you don't use them).
-- **Quality gates** — skill linting, cross-reference checks, version single-sourcing.
+- **AI harness** — one `AGENTS.md` Constitution plus 17 skills for Claude Code, Codex,
+  Cursor and GitHub Copilot, with a write-time hook for Claude Code and a commit-time
+  scan for every tool.
+- **Quality gates** — eight skill gates (`AGENTS.md` budget, generated-tree sync, shape,
+  vendored-skill hashes, rule drift, references, heading pointers, cross-references),
+  version single-sourcing.
 - **Exploration-first UI testing** — `playwright-cli` wired in for live-app exploration
   before any selector is written.
 

@@ -1,0 +1,346 @@
+{
+    "skill_name": "ai-native-workflow",
+    "evals": [
+        {
+            "id": 0,
+            "name": "codegen-complete-info",
+            "prompt": "Add API tests for POST /auth/login. Area folder is app. Treat the following OpenAPI fragment as the documented contract and cover all status codes it lists:\n\npaths:\n  /auth/login:\n    post:\n      requestBody:\n        content:\n          application/json:\n            schema:\n              type: object\n              required: [email, password]\n              properties:\n                email: {type: string}\n                password: {type: string}\n      responses:\n        '200': {description: OK — returns the user object}\n        '401': {description: Unauthorized — body has message and statusCode fields}",
+            "expected_output": "Phase 4 confidence block with score >=8, routes to api-testing first, chains to data-strategy/enums/type-safety, no premature edits, asks human gate before applying.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "phase4_block_emitted",
+                    "text": "Output contains a Phase 4 / Proposal block with Confidence: <number>"
+                },
+                {
+                    "id": "confidence_score_high",
+                    "text": "Confidence score is >=8 (full info, low risk)"
+                },
+                {
+                    "id": "rationale_and_unknowns_present",
+                    "text": "Both Rationale and Unknowns lines present in proposal"
+                },
+                {
+                    "id": "first_skill_api_testing",
+                    "text": "References api-testing skill as first skill loaded"
+                },
+                {
+                    "id": "stops_at_human_gate",
+                    "text": "Stops to await human approval before generating any test files"
+                },
+                {
+                    "id": "no_invented_paths",
+                    "text": "Does not invent new folder names or file paths beyond what user supplied or what ls would reveal"
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "name": "codegen-missing-area",
+            "prompt": "Add tests for the login API endpoint.",
+            "expected_output": "Asks the user for area folder + spec source. Does NOT emit Phase 4 with confidence <5, does NOT invent front-office or any area name.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "asks_clarifying_question",
+                    "text": "Output contains an explicit question to the user about area folder, endpoint path, or spec source"
+                },
+                {
+                    "id": "no_phase4_when_under_confidence_floor",
+                    "text": "Does NOT emit a full Phase 4 Proposal block (per <5 -> ASK rule)"
+                },
+                {
+                    "id": "no_invented_area",
+                    "text": "Does not name a specific area folder (front-office / back-office / portal) without user input"
+                },
+                {
+                    "id": "no_premature_codegen",
+                    "text": "Does not start writing test code, schemas, or factories"
+                },
+                {
+                    "id": "cites_ask_rule",
+                    "text": "References the <5 -> ASK rule, missing-input rule, or equivalent reason for asking"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "codegen-missing-source",
+            "prompt": "Test the user signup endpoint. It returns 201 on success.",
+            "expected_output": "Asks for OpenAPI / Swagger source first. Does NOT jump to live HTTP exploration. Does NOT invent endpoint path, request body shape, or response schema.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "asks_for_spec_source",
+                    "text": "Asks for OpenAPI / Swagger documentation location before doing anything else"
+                },
+                {
+                    "id": "no_invented_endpoint_path",
+                    "text": "Does not assume a specific endpoint path like /api/users or /api/signup without confirmation"
+                },
+                {
+                    "id": "no_invented_request_body",
+                    "text": "Does not invent field names for the signup request body"
+                },
+                {
+                    "id": "live_http_only_as_fallback",
+                    "text": "If proposing live HTTP, frames it as fallback for when no spec exists, not the primary approach"
+                },
+                {
+                    "id": "no_phase4_yet",
+                    "text": "Does not emit a full Phase 4 Proposal block before getting the spec source"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "refactor-cascading-rename",
+            "prompt": "Rename the value of ApiEndpoints.LOGIN from /auth/login to /v2/auth/login.",
+            "expected_output": "Loads refactor-values skill, runs impact-grep across enums/, fixtures/, tests/, helpers/ before proposing edits. Phase 4 includes affected file list as evidence.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "loads_refactor_values_skill",
+                    "text": "References or loads the refactor-values skill"
+                },
+                {
+                    "id": "impact_grep_first",
+                    "text": "Performs an impact analysis (grep / search) for ApiEndpoints.LOGIN call sites BEFORE proposing edits"
+                },
+                {
+                    "id": "phase4_lists_affected_files",
+                    "text": "Phase 4 Proposal lists the files that will change, not just the enum file"
+                },
+                {
+                    "id": "no_blind_edit",
+                    "text": "Does not edit the enum value without first showing impact"
+                },
+                {
+                    "id": "asks_about_test_data_static",
+                    "text": "Considers or asks about test-data/static/ files that may hardcode the path"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "debug-flaky-test",
+            "prompt": "This test is flaky in CI: tests/app/api/login.spec.ts. It passes locally but fails about 1 in 5 runs in CI with a TimeoutError — the POST to ApiEndpoints.LOGIN times out before a response arrives. Fix it.",
+            "expected_output": "Loads debugging skill. Investigates root cause via trace/CI artifacts. Does NOT bump timeouts. Does NOT add page.waitForTimeout. Distinguishes test bug vs product bug. Considers test.skip + FIXME if confirmed product bug.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "loads_debugging_skill",
+                    "text": "References or loads the debugging skill"
+                },
+                {
+                    "id": "no_timeout_bump",
+                    "text": "Does NOT propose raising timeout values or adding test.setTimeout to mask the failure"
+                },
+                {
+                    "id": "no_wait_for_timeout",
+                    "text": "Does NOT propose page.waitForTimeout or any hard wait"
+                },
+                {
+                    "id": "investigates_root_cause",
+                    "text": "Proposes pulling CI traces / screenshots / videos before patching"
+                },
+                {
+                    "id": "considers_skip_with_fixme",
+                    "text": "If pointing toward a product bug, considers test.skip + // FIXME instead of silent failure or weakening assertion"
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "name": "ui-explore-no-cli",
+            "prompt": "Create a page object for the /admin page. By the way, playwright-cli is not installed and I cannot install it right now. Can you use the IDE browser MCP to explore the page instead?",
+            "expected_output": "Refuses to substitute another tool for playwright-cli. Cites No Substitute UI Exploration WON'T rule. Stops and asks the user to install playwright-cli or supply the page structure.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "refuses_substitute_tool",
+                    "text": "Refuses to use IDE browser MCP / Cursor browser / playwright codegen as substitute for playwright-cli"
+                },
+                {
+                    "id": "cites_wont_rule",
+                    "text": "Cites the No Substitute UI Exploration rule or the Explore Before Generate MUST"
+                },
+                {
+                    "id": "no_invented_selectors",
+                    "text": "Does not produce a page object with invented locators"
+                },
+                {
+                    "id": "asks_for_alternative",
+                    "text": "Asks user to install playwright-cli or supply page structure manually"
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "name": "direct-mode-trivial",
+            "prompt": "There's a typo in the JSDoc of enums/util/roles.ts -- it says 'shraed across all application areas' instead of 'shared'. Just fix it.",
+            "expected_output": "Direct Mode routing: no full Phase 4 ritual for a one-word typo. Opens the file first; the outcome must match what the file actually contains (fix if the typo exists, report the mismatch if it doesn't). Graded on mode selection, not on whether the premise holds.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "uses_direct_mode",
+                    "text": "Handles the request in Direct Mode -- no full 8-phase ritual or Proposal/Confidence/Rationale/Unknowns block for a one-word typo"
+                },
+                {
+                    "id": "verifies_before_acting",
+                    "text": "Opens enums/util/roles.ts and checks the cited JSDoc before editing"
+                },
+                {
+                    "id": "outcome_matches_file_reality",
+                    "text": "Outcome is consistent with the file's actual content: applies the one-word fix if the typo exists, otherwise reports that the cited typo is not present -- never edits something else to satisfy the request"
+                },
+                {
+                    "id": "no_unrelated_changes",
+                    "text": "Does not bundle unrelated cleanup or refactors"
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "name": "direct-mode-false-premise",
+            "prompt": "There's a typo in fixtures/pom/test-options.ts on line 1 -- the comment says 'Singel import point'. Just fix it.",
+            "expected_output": "Opens the file, finds the premise is false (no such typo on line 1), stops and reports the mismatch instead of applying any edit.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "verifies_premise_first",
+                    "text": "Reads the cited file/line before editing"
+                },
+                {
+                    "id": "reports_mismatch",
+                    "text": "Reports that the described typo does not exist at the cited location"
+                },
+                {
+                    "id": "no_edit_applied",
+                    "text": "Does not modify the file or 'fix' something else to satisfy the request"
+                },
+                {
+                    "id": "asks_or_stops",
+                    "text": "Asks the user to re-check or clarifies what they meant instead of guessing"
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "name": "confidence-band-5-7-tradeoff",
+            "prompt": "Add API tests for DELETE /api/sessions/:id. Area folder is app. The documented contract is exactly this OpenAPI fragment -- it documents 204 (deleted) and 401 (unauthorized) but says nothing about what happens for a non-existent session id; the team thinks it's 404 but nobody is sure:\n\npaths:\n  /api/sessions/{id}:\n    delete:\n      responses:\n        '204': {description: Deleted}\n        '401': {description: Unauthorized}\n\nProceed with what you have.",
+            "expected_output": "Emits Phase 4 with confidence in the 5-7 band, the 404 ambiguity listed under Unknowns, and waits for the human to accept the trade-off. Does not silently assume 404 is documented, does not refuse outright.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "phase4_emitted_mid_band",
+                    "text": "Emits a Phase 4 Proposal block with a confidence score in the 5-7 range"
+                },
+                {
+                    "id": "unknown_404_listed",
+                    "text": "The undocumented non-existent-id behavior appears explicitly in the Unknowns line"
+                },
+                {
+                    "id": "waits_for_human",
+                    "text": "Waits for human confirmation before applying, framing the unknown as an accepted trade-off decision"
+                },
+                {
+                    "id": "plans_skip_or_flag_for_gap",
+                    "text": "Plans to cover the ambiguous case via test.skip + FIXME or flags it for spec clarification -- not silently omitted"
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "name": "rejection-reenters-phase3",
+            "prompt": "Earlier you proposed adding login API tests built on the spec export I gave you, and I rejected the plan because that export is outdated -- the real contract is the v2 spec the backend team publishes. Continue.",
+            "expected_output": "Re-enters Phase 3 with the stated gap: asks where the v2 spec lives. Does NOT re-emit the same plan against docs/openapi.yml.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "does_not_retry_same_plan",
+                    "text": "Does not re-propose the same plan built on the rejected spec export"
+                },
+                {
+                    "id": "asks_for_v2_spec_location",
+                    "text": "Asks where the v2 spec lives (URL / file / export) before planning again"
+                },
+                {
+                    "id": "reenters_exploration",
+                    "text": "Frames the next step as renewed exploration (Phase 3) with the stated gap, not as a defense of the rejected plan"
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "name": "routing-factory-data-strategy",
+            "prompt": "Create a factory for generating product test data -- products have a name, a price, and a category. Area folder is app.",
+            "expected_output": "Routes to data-strategy as first skill, chains to type-safety, plans a Faker+Zod factory under test-data/factories/app/, does not put dynamic data in test-data/static/.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "first_skill_data_strategy",
+                    "text": "References data-strategy as the first skill loaded"
+                },
+                {
+                    "id": "factory_location_correct",
+                    "text": "Plans the factory under test-data/factories/app/ with a .factory.ts name"
+                },
+                {
+                    "id": "faker_for_dynamic_data",
+                    "text": "Uses Faker for the generated values, not hardcoded strings"
+                },
+                {
+                    "id": "not_static_tier",
+                    "text": "Does not place dynamic happy-path data under test-data/static/"
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "name": "routing-env-var-config",
+            "prompt": "Our tests need to hit a new reporting service. Add a REPORTING_URL environment variable and make it available to tests.",
+            "expected_output": "Routes to config as first skill: declares the var in env/.env.example, adds a config property with JSDoc naming the env var, does not put the URL in an enum or hardcode it.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "first_skill_config",
+                    "text": "References the config skill as the routing target"
+                },
+                {
+                    "id": "declared_in_env_example",
+                    "text": "Plans to declare REPORTING_URL in env/.env.example"
+                },
+                {
+                    "id": "not_an_enum",
+                    "text": "Does not put the URL into enums/ (URLs are env/config, not enums)"
+                },
+                {
+                    "id": "jsdoc_names_env_var",
+                    "text": "Config property JSDoc names the backing env variable"
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "name": "headless-gate-policy",
+            "prompt": "You are running non-interactively (claude -p, no human available to answer). Add API tests for POST /auth/login. Area folder is app. Treat the following OpenAPI fragment as the documented contract and cover all status codes it lists:\n\npaths:\n  /auth/login:\n    post:\n      requestBody:\n        content:\n          application/json:\n            schema:\n              type: object\n              required: [email, password]\n              properties:\n                email: {type: string}\n                password: {type: string}\n      responses:\n        '200': {description: OK — returns the user object}\n        '401': {description: Unauthorized — body has message and statusCode fields}",
+            "expected_output": "All primary inputs present -> confidence >=8 with Unknowns: none -> may auto-proceed through Phase 5, and the final report explicitly states the human gate was auto-passed and why. If anything is unknown, emits the proposal and stops instead.",
+            "files": [],
+            "assertions": [
+                {
+                    "id": "applies_headless_policy",
+                    "text": "References the non-interactive Phase 5 policy (auto-proceed only at confidence >=8 with no unknowns)"
+                },
+                {
+                    "id": "reports_auto_pass",
+                    "text": "If proceeding, the report states the human gate was auto-passed and on what grounds"
+                },
+                {
+                    "id": "stops_if_unknowns",
+                    "text": "If any unknown or sub-8 confidence exists, emits the proposal as final output and stops instead of applying"
+                }
+            ]
+        }
+    ]
+}

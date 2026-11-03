@@ -1,15 +1,14 @@
-# Component Templates
+# Component templates
 
-Prompt template for reusable UI components composed into page objects. The `page-objects` and `selectors` skills own the deep rules.
+Prompt template for reusable UI components composed into page objects. `page-objects` and `selectors` own the rules.
 
-## Add a Reusable Component
+## Add a reusable component
 
 ```
-Create a component object for [COMPONENT NAME] (e.g., header, modal, sidebar):
-- Location: pages/components/[name].component.ts
-- Elements: [list of elements]
-- Actions: [list of actions]
+Create a component object for [COMPONENT NAME] (header, modal, sidebar):
+- location pages/components/[name].component.ts
+- elements: [list]
+- actions: [list]
 
-The component should be composable into page objects.
-Follow the pattern from pages/components/navigation.component.ts.
+Composable into page objects; pattern file pages/components/navigation.component.ts. Follow the page-objects and selectors skills.
 ```

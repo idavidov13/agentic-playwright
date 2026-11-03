@@ -31,7 +31,11 @@ export enum ApiEndpoints {
     REGISTER = '/users/register',
 }
 
-/** Storage state file paths */
+/**
+ * Auth state files written by the setup projects
+ * (`tests/app/auth-api.setup.ts` and `tests/app/auth.setup.ts`).
+ */
 export enum StorageStatePaths {
     APP = '.auth/app/appStorageState.json',
+    API_ACCESS_TOKEN = '.auth/app/apiAccessToken.json',
 }

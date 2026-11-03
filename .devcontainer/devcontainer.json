@@ -3,7 +3,7 @@
     "build": {
         "dockerfile": "Dockerfile",
         "context": "..",
-        "args": { "PLAYWRIGHT_VERSION": "1.60.0" }
+        "args": { "PLAYWRIGHT_VERSION": "1.64.1" }
     },
     "customizations": {
         "vscode": {

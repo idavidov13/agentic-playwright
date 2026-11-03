@@ -1,140 +1,90 @@
-# Per-Field Negative Testing — Patterns and Three-Tier Data Rule
+# Negative testing
 
-Long-form examples + invalid-value reference for `api-testing/SKILL.md` Phase 6. The Critical rules and the coverage checklist stay inline in `SKILL.md`; this file holds the verbose per-field patterns, the universal `INVALID_*` constants table, and the three-tier rule for _where_ invalid arrays live.
+Loops for the 400/422 and 404 rows of the coverage matrix. `ApiEndpoints.PRODUCTS` and `generateProduct()` are illustrative: define the enum member (`enums`) and the factory (`data-strategy`) first. Status and error schema come from the contract; the demo API answers validation errors with 422 and `UnprocessableEntityResponseSchema` from `fixtures/api/schemas/util/errorResponseSchema.ts`.
 
-## Type-specific invalid values (universal arrays)
+Three tiers of invalid data, owned by `data-strategy`: the universal type-mismatch arrays (`INVALID_STRING_VALUES`, `INVALID_NUMBER_VALUES`, `INVALID_BOOLEAN_VALUES`, `INVALID_UUID_VALUES`, `INVALID_ENUM_VALUES`, `INVALID_ARRAY_VALUES`, `INVALID_OBJECT_VALUES`) are imported from `test-data/static/util/invalid-values.ts`; a domain set (malformed emails) comes from `test-data/static/{area}/`; a range violation specific to one field stays inline in the spec.
 
-Universal type-mismatch sets live as `as const` exports in `test-data/static/util/invalid-values.ts` and **must** be imported — never redefined inline.
+## Invalid-type loop (spread-and-override)
 
-| Field Type          | Constant                 | Values                                       |
-| ------------------- | ------------------------ | -------------------------------------------- |
-| `string` (required) | `INVALID_STRING_VALUES`  | `[123, true, null, undefined]`               |
-| `string` (uuid)     | `INVALID_UUID_VALUES`    | `['not-a-uuid', '', 123, null, undefined]`   |
-| `number`            | `INVALID_NUMBER_VALUES`  | `['string', '123', true, null, undefined]`   |
-| `boolean`           | `INVALID_BOOLEAN_VALUES` | `['yes', 1, 0, null, undefined]`             |
-| `enum`              | `INVALID_ENUM_VALUES`    | `['invalidValue', '', 123, null, undefined]` |
-| `array`             | `INVALID_ARRAY_VALUES`   | `['string', 123, null, undefined, {}]`       |
-| `object` (nested)   | `INVALID_OBJECT_VALUES`  | `['string', 123, null, undefined, []]`       |
-
-For `string` (email) fields, combine `INVALID_STRING_VALUES` (for type mismatch) with domain-specific email-format violations from `test-data/static/{area}/` — two separate `for...of` loops.
-
-A number field should be tested with a string, a stringified number (`'123'`), a boolean, null, and undefined. A boolean field should be tested with a truthy string, numeric truthy/falsy, null, and undefined. Each type has its own realistic set of "wrong" values.
-
-## Pattern: `for...of` with spread-and-override
-
-Use a valid payload as the base, then override one field at a time with invalid values. This isolates the field under test:
+One valid payload as the base, one field overridden per loop. Repeat the loop per field with the matching `INVALID_*` array; an `email` field gets a second loop over the domain set. For an optional field drop `undefined` from the array (`INVALID_STRING_VALUES.filter((value) => value !== undefined)`): omitting an optional field is valid input, and the omission loop already covers the required ones.
 
 ```typescript
-import { generateProduct } from '../../../test-data/factories/app/product.factory';
+import { ApiEndpoints } from '../../../enums/app/app';
 import {
-    BadRequestResponse,
-    BadRequestResponseSchema,
+    UnprocessableEntityResponse,
+    UnprocessableEntityResponseSchema,
 } from '../../../fixtures/api/schemas/util/errorResponseSchema';
-import {
-    INVALID_NUMBER_VALUES,
-    INVALID_STRING_VALUES,
-} from '../../../test-data/static/util/invalid-values';
+import { expect, test } from '../../../fixtures/pom/test-options';
+import { generateProduct } from '../../../test-data/factories/app/product.factory';
+import { INVALID_STRING_VALUES } from '../../../test-data/static/util/invalid-values';
 
-test.describe('POST /api/products - validation', () => {
+test.describe('POST /products - validation', () => {
     const validPayload = generateProduct();
 
     for (const invalidValue of INVALID_STRING_VALUES) {
         test(
-            `should return 400 when name is ${JSON.stringify(invalidValue)}`,
+            `should return 422 when name is ${JSON.stringify(invalidValue)}`,
             { tag: '@api' },
             async ({ apiRequest }) => {
-                const { status, body } = await apiRequest<BadRequestResponse>({
-                    method: 'POST',
-                    url: ApiEndpoints.PRODUCTS,
-                    baseUrl: process.env.API_URL,
-                    headers: process.env.ACCESS_TOKEN,
-                    body: { ...validPayload, name: invalidValue },
-                });
+                const { status, body } =
+                    await apiRequest<UnprocessableEntityResponse>({
+                        method: 'POST',
+                        url: ApiEndpoints.PRODUCTS,
+                        baseUrl: process.env.API_URL,
+                        headers: process.env.ACCESS_TOKEN,
+                        body: { ...validPayload, name: invalidValue },
+                    });
 
-                expect(status).toBe(400);
-                expect(BadRequestResponseSchema.parse(body)).toBeTruthy();
-            }
-        );
-    }
-
-    for (const invalidValue of INVALID_NUMBER_VALUES) {
-        test(
-            `should return 400 when price is ${JSON.stringify(invalidValue)}`,
-            { tag: '@api' },
-            async ({ apiRequest }) => {
-                const { status, body } = await apiRequest<BadRequestResponse>({
-                    method: 'POST',
-                    url: ApiEndpoints.PRODUCTS,
-                    baseUrl: process.env.API_URL,
-                    headers: process.env.ACCESS_TOKEN,
-                    body: { ...validPayload, price: invalidValue },
-                });
-
-                expect(status).toBe(400);
-                expect(BadRequestResponseSchema.parse(body)).toBeTruthy();
-            }
-        );
-    }
-
-    // Inline is acceptable here: these are field-specific range violations for
-    // `rating` (constrained to 1..5) and are not reusable anywhere else.
-    const outOfRangeRatings = [-1, 0, 0.99, 5.01, 6, 1000];
-    for (const invalidValue of outOfRangeRatings) {
-        test(
-            `should return 400 when rating is out of range (${invalidValue})`,
-            { tag: '@api' },
-            async ({ apiRequest }) => {
-                const { status, body } = await apiRequest<BadRequestResponse>({
-                    method: 'POST',
-                    url: ApiEndpoints.PRODUCTS,
-                    baseUrl: process.env.API_URL,
-                    headers: process.env.ACCESS_TOKEN,
-                    body: { ...validPayload, rating: invalidValue },
-                });
-
-                expect(status).toBe(400);
-                expect(BadRequestResponseSchema.parse(body)).toBeTruthy();
+                expect(status).toBe(422);
+                expect(
+                    UnprocessableEntityResponseSchema.parse(body)
+                ).toBeTruthy();
             }
         );
     }
 });
 ```
 
-## Pattern: omitting required fields
+An inline range set for one field takes the same loop: `const outOfRangeRatings = [-1, 0, 5.01, 1000];` for a `rating` constrained to 1..5. The empty-body test is one more test in the block with `body: {}`.
 
-To test that each required field triggers a 400 when missing, omit one field at a time using destructure + rest:
+## Omission loop
+
+One test per required field, removing only that field with destructure + rest.
 
 ```typescript
-test.describe('POST /api/products - missing required fields', () => {
+test.describe('POST /products - missing required fields', () => {
     const validPayload = generateProduct();
-
     const requiredFields = ['name', 'price', 'category'] as const;
+
     for (const field of requiredFields) {
         test(
-            `should return 400 when ${field} is missing`,
+            `should return 422 when ${field} is missing`,
             { tag: '@api' },
             async ({ apiRequest }) => {
                 const { [field]: _, ...payloadWithoutField } = validPayload;
 
-                const { status, body } = await apiRequest<BadRequestResponse>({
-                    method: 'POST',
-                    url: ApiEndpoints.PRODUCTS,
-                    baseUrl: process.env.API_URL,
-                    headers: process.env.ACCESS_TOKEN,
-                    body: payloadWithoutField,
-                });
+                const { status, body } =
+                    await apiRequest<UnprocessableEntityResponse>({
+                        method: 'POST',
+                        url: ApiEndpoints.PRODUCTS,
+                        baseUrl: process.env.API_URL,
+                        headers: process.env.ACCESS_TOKEN,
+                        body: payloadWithoutField,
+                    });
 
-                expect(status).toBe(400);
-                expect(BadRequestResponseSchema.parse(body)).toBeTruthy();
+                expect(status).toBe(422);
+                expect(
+                    UnprocessableEntityResponseSchema.parse(body)
+                ).toBeTruthy();
             }
         );
     }
 });
 ```
 
-## Pattern: path parameter validation
+## Path-parameter loop
 
-For every endpoint with a path parameter (e.g., `/products/{productId}`), test with invalid formats using a data-driven loop:
+Every path parameter, whether or not the contract mentions invalid formats. Send the auth header when the endpoint needs it, otherwise a 401 masquerades as 404 coverage.
 
 ```typescript
 const invalidProductIds = [
@@ -143,29 +93,26 @@ const invalidProductIds = [
     { description: 'special characters', value: '<script>' },
     { description: 'SQL injection attempt', value: '1 OR 1=1' },
 ];
+
 for (const { description, value } of invalidProductIds) {
     test(
         `should return 404 for invalid productId - ${description}`,
         { tag: '@api' },
         async ({ apiRequest }) => {
-            const { status } = await apiRequest<ItemNotFoundResponse>({
+            const { status, body } = await apiRequest<NotFoundResponse>({
                 method: 'GET',
                 url: `${ApiEndpoints.PRODUCTS}/${encodeURIComponent(value)}`,
                 baseUrl: process.env.API_URL,
+                headers: process.env.ACCESS_TOKEN,
             });
 
             expect(status).toBe(404);
+            expect(NotFoundResponseSchema.parse(body)).toBeTruthy();
         }
     );
 }
 ```
 
-This is **not optional**. Every path parameter needs these tests regardless of whether the OpenAPI spec mentions them.
+## Query-parameter loop
 
-## Three-tier rule — where invalid-value arrays live
-
-1. **Universal type-mismatch arrays** (values that are wrong for any field of a given primitive type) — **must** live in `test-data/static/util/invalid-values.ts` as exported `as const` tuples (`INVALID_STRING_VALUES`, `INVALID_NUMBER_VALUES`, `INVALID_BOOLEAN_VALUES`, `INVALID_UUID_VALUES`, `INVALID_ENUM_VALUES`, `INVALID_ARRAY_VALUES`, `INVALID_OBJECT_VALUES`). The file must be `.ts`, not `.json`, so it can represent `undefined`. Spec files import and iterate — **never** redefine inline.
-2. **Domain-specific curated invalid values** (invalid email formats, password policy violations, invalid locales, forbidden product categories, etc.) — live under `test-data/static/{area}/` as `.ts` with `as const` exports, following the existing `invalidCredentials.ts` precedent (`INVALID_EMAILS`, `INVALID_PASSWORDS`, `INVALID_LOGIN_ATTEMPTS`). Also imported, never inline. Never `.json`.
-3. **Field-specific boundary / constraint values** (e.g., out-of-range values for a `number` field constrained to `1..5`: `[-1, 0, 0.99, 5.01, 6, 1000]`) — **may stay inline** in the spec file when the set is meaningful to exactly one field and promoting it (e.g., `INVALID_NUMBER_VALUES_1_TO_5`) would be over-engineering. If the same boundary set is needed in 2+ fields or spec files, promote it to static data.
-
-A single validation describe typically combines tier 1 and tier 3 in separate `for...of` loops: one iterating `INVALID_NUMBER_VALUES` for type mismatch, another iterating an inline array for range violations.
+For documented query parameters (pagination, filters, sorting) compose the query onto the enum path, `` `${ApiEndpoints.PRODUCTS}?page=${value}` ``: the enum owns the path, the contract owns the parameter values. Cover an invalid type per parameter (`page=abc`, `limit=-1`), out-of-range values, and unknown parameters when the contract defines their behaviour. A list response (data array plus pagination metadata) gets its own `z.strictObject` schema like any other response.

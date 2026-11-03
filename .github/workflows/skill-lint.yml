@@ -1,34 +1,51 @@
 # Gates the orchestration layer: every PR (and push to main) touching the
-# rule trees, the Constitution, the linters, or a version surface must pass
-# the skill drift checks and the version-drift check. Pure bash + git -- no
-# Node install needed.
+# rule trees, the Constitution, the gates, or a version surface must pass
+# the skill drift checks and the version-drift check. Pure bash + git, plus
+# one Node-free hash check of the vendored skills.
 name: Skill Lint
+
+permissions:
+    contents: read
 
 on:
     push:
         branches: [main]
         paths:
+            - 'AGENTS.md'
             - 'CLAUDE.md'
+            - 'AI-WORKFLOWS.md'
+            - 'skills-lock.json'
             - '.claude/**'
-            - '.cursor/**'
-            - '.github/instructions/**'
-            - '.github/skills/**'
+            - '.agents/**'
+            - '.github/prompts/**'
             - '.github/workflows/skill-lint.yml'
             - 'scripts/check-*.sh'
+            - 'scripts/sync-*.sh'
+            - 'scripts/rules-manifest.txt'
+            - 'scripts/playwright-cli.sh'
+            - 'scripts/playwright-cli.cmd'
             - 'VERSION'
             - 'package.json'
+            - 'package-lock.json'
             - 'CHANGELOG.md'
     pull_request:
         paths:
+            - 'AGENTS.md'
             - 'CLAUDE.md'
+            - 'AI-WORKFLOWS.md'
+            - 'skills-lock.json'
             - '.claude/**'
-            - '.cursor/**'
-            - '.github/instructions/**'
-            - '.github/skills/**'
+            - '.agents/**'
+            - '.github/prompts/**'
             - '.github/workflows/skill-lint.yml'
             - 'scripts/check-*.sh'
+            - 'scripts/sync-*.sh'
+            - 'scripts/rules-manifest.txt'
+            - 'scripts/playwright-cli.sh'
+            - 'scripts/playwright-cli.cmd'
             - 'VERSION'
             - 'package.json'
+            - 'package-lock.json'
             - 'CHANGELOG.md'
 
 jobs:
@@ -37,19 +54,34 @@ jobs:
         steps:
             - uses: actions/checkout@v7
 
-            - name: Constitution rules -> skill Critical blocks
+            - name: AGENTS.md budget, bare @, Skills Index sync; CLAUDE.md import; Copilot prompt anchors
+              run: bash scripts/check-agents-md.sh
+
+            - name: .agents/skills matches generation from .claude/skills
+              run: bash scripts/check-skills-sync.sh
+
+            - name: Constitution rules -> skill Critical blocks; hook rule ids -> Constitution rows
               run: bash scripts/check-rules-drift.sh
 
             - name: SKILL.md -> references/ pointers, orphans, anchors
               run: bash scripts/check-skill-references-drift.sh
 
-            - name: Skills Index sync, frontmatter, cross-skill refs
+            - name: Cross-skill heading pointers resolve
+              run: bash scripts/check-heading-pointers.sh
+
+            - name: Frontmatter, cross-skill refs
               run: bash scripts/check-skill-crossrefs.sh
+
+            - name: Skill shape (authoring caps, headings, harness-neutral wording)
+              run: bash scripts/check-skill-shape.sh
+
+            - name: Vendored skill directories match skills-lock.json
+              run: bash scripts/sync-upstream-skills.sh verify
 
     version-lint:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v7
 
-            - name: VERSION <-> package.json <-> CHANGELOG consistency
+            - name: VERSION <-> package.json <-> package-lock.json <-> CHANGELOG consistency
               run: bash scripts/check-version-drift.sh

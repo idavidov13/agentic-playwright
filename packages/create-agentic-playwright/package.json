@@ -1,6 +1,6 @@
 {
     "name": "create-agentic-playwright",
-    "version": "1.0.2",
+    "version": "2.0.0",
     "description": "Production-grade Playwright + TypeScript Scaffold for Agentic Testing. Harness for all major AI coding agents baked in.",
     "bin": {
         "create-agentic-playwright": "bin/create.js"
@@ -21,6 +21,8 @@
         "claude-code",
         "cursor",
         "github-copilot",
+        "agents-md",
+        "codex",
         "testing",
         "e2e",
         "api-testing",
@@ -39,6 +41,6 @@
     },
     "homepage": "https://github.com/idavidov13/agentic-playwright#readme",
     "engines": {
-        "node": ">=20"
+        "node": ">=22"
     }
 }

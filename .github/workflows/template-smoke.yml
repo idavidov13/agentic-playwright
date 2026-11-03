@@ -19,7 +19,7 @@ jobs:
 
             - uses: actions/setup-node@v7
               with:
-                  node-version: 20
+                  node-version: 22
                   cache: npm
 
             - name: Pack the initializer (runs prepack -> bundles template/)
@@ -39,7 +39,7 @@ jobs:
                   npx eslint .
                   npx prettier --check .
 
-            - name: Generated project — skill + version gates
+            - name: Generated project — the eight skill gates + version gate
               working-directory: /tmp/smoke/demo-project
               run: |
                   npm run check:skills
@@ -54,11 +54,33 @@ jobs:
                   npx playwright install --with-deps chromium
                   npx playwright test --project=api
 
-            - name: Pruned variant — gates still green without Cursor/Copilot trees
+            # Pruned variants: without the Claude Code tree the gates lint the
+            # generated .agents/skills copy; without .agents/ they lint the
+            # canonical tree. --skip-git: the gates must not need a repository.
+            - name: Pruned variant — no Claude Code tree
               run: |
                   cd /tmp/smoke
-                  node package/bin/create.js pruned-project --demo --no-cursor --no-copilot --skip-install --skip-git
-                  cd pruned-project
+                  node package/bin/create.js no-claude --demo --no-claude --skip-install --skip-git
+                  cd no-claude
+                  bash scripts/check-agents-md.sh
+                  bash scripts/check-skills-sync.sh
+                  bash scripts/check-skill-shape.sh
+                  bash scripts/sync-upstream-skills.sh verify
                   bash scripts/check-rules-drift.sh
                   bash scripts/check-skill-references-drift.sh
+                  bash scripts/check-heading-pointers.sh
+                  bash scripts/check-skill-crossrefs.sh
+
+            - name: Pruned variant — no .agents tree, no Copilot prompt
+              run: |
+                  cd /tmp/smoke
+                  node package/bin/create.js no-agents --demo --no-agents --no-copilot --skip-install --skip-git
+                  cd no-agents
+                  bash scripts/check-agents-md.sh
+                  bash scripts/check-skills-sync.sh
+                  bash scripts/check-skill-shape.sh
+                  bash scripts/sync-upstream-skills.sh verify
+                  bash scripts/check-rules-drift.sh
+                  bash scripts/check-skill-references-drift.sh
+                  bash scripts/check-heading-pointers.sh
                   bash scripts/check-skill-crossrefs.sh

@@ -8,6 +8,7 @@ import { AppPage } from '../../pages/app/app.page';
 export type FrameworkFixtures = {
     /** Main application page object */
     appPage: AppPage;
+    /** Clears cookies, permissions and the app's web storage so the test starts signed out */
     resetStorageState: () => Promise<void>;
 };
 
@@ -30,10 +31,19 @@ export const test = base.extend<FrameworkFixtures>({
         await use(new AppPage(page));
     },
 
-    resetStorageState: async ({ context }, use) => {
+    resetStorageState: async ({ context, page }, use) => {
         await use(async () => {
             await context.clearCookies();
             await context.clearPermissions();
+            // Web storage is per origin: the page must be on the app before
+            // localStorage (where this app keeps its token) can be cleared.
+            await page.goto(process.env.APP_URL!, {
+                waitUntil: 'domcontentloaded',
+            });
+            await page.evaluate(() => {
+                window.localStorage.clear();
+                window.sessionStorage.clear();
+            });
         });
     },
 });

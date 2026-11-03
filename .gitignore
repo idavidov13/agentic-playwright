@@ -22,5 +22,9 @@ env/.env.*
 # macOS
 .DS_Store
 
-# Playwright CLI
+# Playwright CLI — whole session dir: exploration auth state, cookies,
+# snapshots, traces. Must never be committable (scaffold-usage.md relies on it).
 .playwright-cli/
+
+# Python bytecode (hook scripts, eval tooling)
+__pycache__/

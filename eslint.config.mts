@@ -31,7 +31,7 @@ const playwrightRecommendedRules =
     (playwright.configs?.['flat/recommended'] as PluginConfig)?.rules ?? {};
 
 /**
- * ESLint flat configuration for the Agentic Playwright project.
+ * ESLint flat configuration for the Playwright Scaffold project.
  * Uses TypeScript, Prettier, and Playwright plugins for comprehensive linting.
  */
 const config = [
@@ -87,7 +87,12 @@ const config = [
             'playwright/missing-playwright-await': 'error',
             'playwright/no-page-pause': 'error',
             'playwright/no-useless-await': 'error',
-            'playwright/no-skipped-test': 'error',
+            // OFF, deliberately: the Constitution MANDATES `test.skip` +
+            // `// FIXME` for documented-but-broken endpoints (WON'T: No
+            // Silent Coverage Drops) — this rule at error/warn would fail CI
+            // on exactly that sanctioned pattern. Unjustified skips are a
+            // review-time finding (pr-reviewer checklist), not a lint error.
+            'playwright/no-skipped-test': 'off',
 
             // Additional Playwright rules for Constitution compliance
             'playwright/no-wait-for-timeout': 'error', // WON'T: No Hard Waits
@@ -96,7 +101,10 @@ const config = [
             'playwright/no-raw-locators': 'warn', // MUST: Prefer semantic locators
             'playwright/no-useless-not': 'error', // Clean assertions
             'playwright/no-nth-methods': 'warn', // Avoid brittle nth selectors
-            'playwright/prefer-lowercase-title': 'warn', // Consistent test naming
+            'playwright/prefer-lowercase-title': [
+                'warn',
+                { ignore: ['test.describe'] },
+            ], // Consistent test naming; describe titles may read `METHOD /path`
             'playwright/prefer-to-be': 'error', // Use toBe over toEqual for primitives
             'playwright/prefer-to-have-length': 'error', // Cleaner length assertions
             'playwright/require-top-level-describe': 'error', // Organized test structure
