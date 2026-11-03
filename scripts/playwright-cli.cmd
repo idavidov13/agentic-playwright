@@ -17,7 +17,9 @@ REM not arm the gate.
 set "CMD=%~1"
 set "EXPLORE_CMDS= open goto snapshot click dblclick fill type drag hover select upload check uncheck press keydown keyup mousemove mousedown mouseup mousewheel eval run-code screenshot pdf go-back go-forward reload resize tab-list tab-new tab-close tab-select dialog-accept dialog-dismiss console requests request find highlight generate-locator drop "
 
-"%~dp0..\node_modules\.bin\playwright-cli.cmd" %*
+REM `call` is required: running another .cmd without it transfers control and
+REM never returns, so the marker below would never be touched.
+call "%~dp0..\node_modules\.bin\playwright-cli.cmd" %*
 set "STATUS=%ERRORLEVEL%"
 if not "%STATUS%"=="0" exit /b %STATUS%
 if "%CMD%"=="" exit /b 0

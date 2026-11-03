@@ -15,6 +15,7 @@
  *   --yes             Accept all defaults for any question not answered by flags.
  *   --no-claude       Prune Claude Code's files (.claude/, CLAUDE.md); AGENTS.md stays.
  *   --no-agents       Prune .agents/ (the skills Codex, Cursor and Copilot read).
+ *                     Ignored with --no-claude: AGENTS.md needs one skill tree.
  *   --no-copilot      Prune the GitHub Copilot PR-review prompt (.github/prompts/).
  *   --no-cursor       Accepted for compatibility: Cursor reads AGENTS.md and .agents/.
  *   --skip-install    Do not run npm install (implies --skip-browsers, --skip-smoke).
@@ -110,11 +111,11 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-    const header = fs
-        .readFileSync(__filename, 'utf8')
-        .split('\n')
-        .slice(1, 26)
-        .filter((l) => l !== '/**' && l !== ' */')
+    // The help text is the header comment, up to its closing ` */`.
+    const lines = fs.readFileSync(__filename, 'utf8').split('\n');
+    const header = lines
+        .slice(1, lines.indexOf(' */'))
+        .filter((l) => l !== '/**')
         .map((l) => l.replace(/^ \* ?/, ''))
         .join('\n');
     console.log(header);
@@ -371,6 +372,16 @@ async function main() {
     stampReadmeTitle(projectDir, projectName);
     writeEnvFile(projectDir, env);
 
+    // AGENTS.md always ships and its Skills Index points at a skill tree, so
+    // at least one tree must stay: pruning both would leave every pointer
+    // dangling and the gates red. Keep .agents/ in that case.
+    if (!keepClaude && !keepAgents) {
+        keepAgents = true;
+        log(
+            '  Note: AGENTS.md needs one skill tree; keeping .agents/ because .claude/ is pruned.'
+        );
+    }
+
     const pruned = [];
     if (!keepClaude) {
         pruneTree(projectDir, CLAUDE_PATHS);
@@ -473,6 +484,9 @@ async function main() {
         log('  Copilot PR review — .github/prompts/pr-reviewer.prompt.md');
     log('\nExploring UI before writing selectors (mandatory workflow):');
     log('  npm run setup:check          # links the playwright-cli wrapper');
+    log(
+        "  npm run playwright-cli:install-browsers  # Chromium for playwright-cli's own cache"
+    );
     log('\nDocs: https://github.com/idavidov13/agentic-playwright');
     log('----------------------------------------------------------------');
 }
