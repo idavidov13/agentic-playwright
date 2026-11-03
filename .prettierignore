@@ -12,11 +12,12 @@ package-lock.json
 # Upstream-tracked Anthropic-style skills -- vendored via skills-lock.json.
 # Reformatting these would change their hash and break `npm run skills:verify`.
 .claude/skills/skill-creator/
-.cursor/skills/skill-creator/
-.github/skills/skill-creator/
 .claude/skills/playwright-cli/
-.cursor/skills/playwright-cli/
-.github/instructions/playwright-cli/
+skills-lock.json
+
+# Generated skill tree -- a byte-for-byte copy of .claude/skills made by
+# sync-skills.sh; formatting it independently would break check:skills-sync.
+.agents/skills/
 
 # Generated reports / static viewers shipped with skill-creator
 **/eval-viewer/

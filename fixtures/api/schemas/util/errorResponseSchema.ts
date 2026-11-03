@@ -12,11 +12,14 @@ import type { output as zOutput } from 'zod/v4';
 
 /**
  * Schema for 401 Unauthorized responses.
- * Live examples: {"error": "Unauthorized"}, {"error": "Invalid login request"}.
+ * Live examples: {"error": "Unauthorized"}, {"error": "Invalid login request"}
+ * from POST /users/login; {"message": "Unauthorized"} from every
+ * token-protected route (GET /messages, GET /favorites).
  */
-export const UnauthorizedResponseSchema = z.strictObject({
-    error: z.string(),
-});
+export const UnauthorizedResponseSchema = z.union([
+    z.strictObject({ error: z.string() }),
+    z.strictObject({ message: z.string() }),
+]);
 
 /**
  * Schema for 403 Forbidden responses.

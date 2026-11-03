@@ -4,7 +4,7 @@
 # Adds: Python 3, Claude Code CLI, pre-warmed npm & CLI caches
 # ============================================================
 
-ARG PLAYWRIGHT_VERSION=1.60.0
+ARG PLAYWRIGHT_VERSION=1.64.1
 FROM mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
 
 LABEL maintainer="Ivan Davidov"

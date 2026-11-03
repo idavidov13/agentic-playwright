@@ -4,7 +4,7 @@
  * Import these in spec files and iterate with `for...of` loops — do NOT
  * redefine them inline. Field-specific boundary/range violations (e.g.,
  * out-of-range values for a `number` constrained to `1..5`) may stay inline
- * in the spec file; see `.claude/skills/api-testing/SKILL.md` (Phase 6).
+ * in the spec file; see the api-testing skill (negative testing).
  *
  * The file is `.ts` (not `.json`) because JSON cannot represent `undefined`.
  * Tuples are `as const` so the array is `readonly` and values keep their

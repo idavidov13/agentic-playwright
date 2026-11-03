@@ -1,36 +1,35 @@
-# Conversation Contract
+# Conversation contract
 
-For predictable, repeatable AI collaboration the human and agent follow these patterns.
+What the human and the agent owe each other at Phases 3 and 5 of `ai-native-workflow`.
 
-## Audit-then-Edit (default for non-trivial work)
+## Primary inputs per intent
 
-1. The user states the goal in plain language.
-2. The agent loads the relevant specialized skill(s) and **proposes scope** — what will change, in which files, why, with the trade-offs, plus a 1-10 confidence + rationale + unknowns block (see `SKILL.md` Phase 4).
-3. The user **approves, modifies, or rejects** the scope.
-4. The agent applies the change.
-5. The agent reports what landed (files, line counts, lint status) and asks whether to commit.
+An input is primary when the task cannot be planned without it. Missing → ask; a guess or a placeholder never stands in for it.
 
-## Direct Mode (for trivial work)
+| Intent                          | Primary inputs                                                                                                   |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Page object, UI test, component | the page URL or route, the `{area}` folder (`ls pages/`), a reachable app for `playwright-cli`                   |
+| API test, schema                | the OpenAPI or Swagger location (live HTTP only when none exists, and say so), the `{area}` folder (`ls tests/`) |
+| Factory, static data set        | the field list or the schema it feeds, the `{area}` folder (`ls test-data/`)                                     |
+| Env var, config property        | the variable name and its consumer                                                                               |
+| Enum or static-value change     | the exact old and new value, and whether the backend change is live                                              |
+| Debug                           | the failing spec path and the failure output (local run or CI run id)                                            |
 
-- One-line fixes, obvious typos, single-import additions: the agent does it and reports back.
-- The user can say "just do it" once to opt out of audit-then-edit for the rest of a session for trivial work.
-- Substantive changes still go through audit-then-edit, regardless of "just do it".
+## Stop and ask
 
-## When the Agent Must Stop and Ask
+- Two valid approaches with a real trade-off: an architectural decision belongs to the human.
+- A loaded skill's Critical rule conflicts with the request: raise the conflict, never bypass it silently.
+- The premise does not match the file (the cited typo, import or value is not there): report the mismatch, apply nothing, ask.
 
-- **Primary input missing** for the task (URL for a page object, OpenAPI / spec for an API test, field list for a factory, area folder name for any path-bound work). Ask before producing a Phase 4 proposal — the confidence thresholds (including the < 5 → ASK floor) live canonically in `SKILL.md` "Phase 4 — Confidence-Gate Format" and are not restated here.
-- Path or folder name unknown (always `ls` first; if still unclear, ask).
-- Enum value, message text, or endpoint path unknown (always `playwright-cli` for UI text or check OpenAPI for API; ask if neither is available).
-- Two valid approaches with meaningful trade-offs (architectural decisions belong to the human).
-- The Critical rule of any skill conflicts with the user's request (raise it; don't silently bypass).
+## Human-gate outcomes
 
-## When the Agent Must Refuse
+| Answer  | Next                                                                                                |
+| ------- | --------------------------------------------------------------------------------------------------- |
+| Approve | Phase 6 with the proposal as the scope; nothing outside it.                                         |
+| Modify  | Re-emit Phase 4 with the modification; re-explore only what the modification needs.                 |
+| Reject  | Phase 3 with the stated gap as the new evidence target; the same plan is never re-emitted reworded. |
 
-- Placeholder selectors / guessed UI text — refuse and re-explore.
-- Hardcoded credentials, URLs, or endpoint paths — refuse and route to `config` / `enums` / `process.env.*`.
-- Suppressed test failures (`try/catch` on `expect`, raised timeouts, silent `.skip`) — refuse and route to `debugging` + `api-testing` Phase 7.
-- `z.object()` instead of `z.strictObject()`, `any` types, XPath selectors, `page.waitForTimeout(...)` — refuse and route to the matching Critical rule.
+## Direct mode
 
-## After Rejection
-
-When the human rejects a proposal, the agent re-enters Phase 3 (Explore) with the stated gap as the new evidence target. The agent does **not** retry Phase 4 with the same plan dressed differently.
+- Trivial work only: a one-line fix, an obvious typo, a single import. Substantive changes run the eight phases even after "just do it".
+- The file is opened and the defect confirmed before the edit; a premise that fails leaves direct mode (report, then ask).

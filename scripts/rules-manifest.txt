@@ -1,0 +1,38 @@
+# Constitution rule anchors — shared manifest.
+# Consumed by:
+#   scripts/check-rules-drift.sh          (anchor must be in the .claude skill's Critical block)
+# Format: <anchor-token>|<owning-skill-dir>|<short-label>
+# Keep tokens short and DISTINCTIVE — a token that matches incidental text
+# (e.g. a bare `.ts`) is a no-op check: the rule could be deleted from the
+# Critical block and the grep would still hit something else. A stylistic
+# rewrite of a Critical block should force a deliberate manifest update.
+fixtures/pom/test-options.ts|fixtures|Single import point for test/expect
+new AppPage(page)|fixtures|No manual page-object instantiation
+getByRole|selectors|Selector priority order
+XPath|selectors|No XPath
+`playwright-cli` is mandatory|selectors|Explore Before Generate (UI)
+z.strictObject|type-safety|Strict Zod schemas
+NEVER** use `any`|type-safety|No any
+SchemaName.parse(body)).toBeTruthy|api-testing|Response validation pattern
+test.skip|api-testing|Behaviour-mismatch protocol
+fuzz path parameters|api-testing|Path-parameter fuzzing
+per-field omission|api-testing|No empty-body-only 400
+more than one API call|api-testing|API calls wrapped in test.step
+access tokens, emails, passwords|api-testing|No secrets
+waitForTimeout|test-standards|No hard waits
+exactly one** tag|test-standards|Single-tag rule
+@destructive|test-standards|@destructive heaviest
+Every state-mutating test|test-standards|State cleanup hooks
+confirm zero failures|test-standards|Test verification after edits
+must be independent|test-standards|Test isolation
+explore-only|test-standards|No explore-only files
+as const` literal values|data-strategy|Static data is TS literals
+Faker factory|data-strategy|Happy-path data via Faker
+hardcode test content strings|data-strategy|No hardcoded test content
+magic numbers|data-strategy|No magic numbers
+process.env|config|Env-driven URLs/credentials
+ApiEndpoints|enums|Endpoint paths in enums
+Forbidden** on locator getters|page-objects|JSDoc rules on actions only
+Feedback locators are not optional|page-objects|No feedback-less POM
+expect(locator)|test-standards|Web-first assertions
+find all consumers|refactor-values|Impact-analysis first

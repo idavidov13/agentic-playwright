@@ -10,6 +10,16 @@ import {
 import { expect, test } from '../../../fixtures/pom/test-options';
 import { INVALID_LOGIN_ATTEMPTS } from '../../../test-data/static/app/invalidCredentials';
 
+/*
+ * DELIBERATELY MINIMAL TEMPLATE — not an example of full coverage.
+ *
+ * This spec demonstrates the scaffold's core patterns (apiRequest fixture,
+ * enum endpoint, schema parse, data-driven loop) against the demo API only.
+ * A real endpoint spec MUST cover the full status-code matrix from the
+ * api-testing skill (coverage matrix): empty body, per-field omission, per-field
+ * invalid-type loops, 405, and every status code in the OpenAPI contract.
+ * Do NOT copy this file's coverage level as the standard.
+ */
 test.describe('api/login', () => {
     test(
         'should return 200 and user data for valid credentials',

@@ -1,26 +1,18 @@
 /**
  * auth.setup.ts
- * Playwright setup script to generate storage states for authentication.
+ * Playwright setup script for the browser storage state (`setup-ui` project).
  *
- * This runs before the main test suite to:
- * 1. Authenticate via API and store access tokens
- * 2. Generate browser storage state with session cookies
+ * Signs in through the page object once per run and saves cookies and web
+ * storage to `StorageStatePaths.APP`; the `chromium` project loads that file,
+ * so UI tests start signed in. The API access token is `auth-api.setup.ts`.
  */
 
 import * as fs from 'node:fs';
 import { expect, test } from '../../fixtures/pom/test-options';
 import { StorageStatePaths } from '../../enums/app/app';
-import {
-    createAppStorageState,
-    setUserAccessToken,
-} from '../../helpers/app/createStorageState';
+import { createAppStorageState } from '../../helpers/app/createStorageState';
 
-test.describe('auth setup', () => {
-    test('setup authentication - API token', async ({ apiRequest }) => {
-        await setUserAccessToken(apiRequest);
-        expect(process.env['ACCESS_TOKEN']).toBeDefined();
-    });
-
+test.describe('auth setup - UI', () => {
     test('setup authentication - browser storage state', async () => {
         await createAppStorageState();
         expect(fs.existsSync(StorageStatePaths.APP)).toBe(true);

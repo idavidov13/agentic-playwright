@@ -6,9 +6,9 @@
 
 <Constitution MUST/WON'T violations and real bugs. Each row: file:line — problem — the rule it breaks — the fix. Omit the section if empty and say so.>
 
-| #   | Issue | Location    | Rule / why            | Fix |
-| --- | ----- | ----------- | --------------------- | --- |
-| 1   | ...   | `path:line` | `CLAUDE.md MUST: ...` | ... |
+| #   | Issue | Location    | Rule / why               | Fix |
+| --- | ----- | ----------- | ------------------------ | --- |
+| 1   | ...   | `path:line` | `Constitution MUST: ...` | ... |
 
 ## 🟠 Should-fix
 

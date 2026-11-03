@@ -1,63 +1,31 @@
-# API Schema Templates
+# API schema templates
 
-Prompt templates for Zod response schemas. The `api-testing` (Phase 1) and `type-safety` skills own the deep rules. Resolve `{area}` with `ls fixtures/api/schemas/` first.
+Prompt templates for Zod response schemas. `api-testing` owns contract sourcing, `type-safety` the Zod shape. Resolve `{area}` with `ls fixtures/api/schemas/` first.
 
-> **Important:** Source schemas from OpenAPI / Swagger documentation when it exists. Only capture the live response shape as a fallback for undocumented endpoints. See the `api-testing` skill (Phase 1).
-
-## Create a New Zod Schema (From Documentation — Default)
+## Create a schema from the documentation (default)
 
 ```
-Create a Zod schema for [ENDPOINT] based on the OpenAPI / Swagger documentation.
+Create a Zod schema for the [STATUS] response of [ENDPOINT] from the OpenAPI document at [LOCATION].
 
-First, run `ls fixtures/api/schemas/` to find the correct area subdirectory.
-
-Then generate the schema from the documented contract:
-- Location: fixtures/api/schemas/{area}/[name]Schema.ts  (use real area name from ls)
-- Use z.strictObject() — never z.object()
-- Field types, required/optional, nullability, and nested shapes exactly match the spec
-- Proper Zod validators (z.email(), z.uuid(), z.url(), z.int(), etc.)
-- Export both the schema and the inferred TypeScript type
-- Spell out the response envelope (success / message / data / errors) as a z.strictObject per the OpenAPI spec — schemas are a 1:1 mirror of the documented contract; do not invent a factory helper. If the envelope repeats across 3+ endpoints in one domain, extract `fixtures/api/schemas/{area}/_envelope.ts` and compose via .extend(...)
-- Follow the pattern from fixtures/api/schemas/app/userSchema.ts
-
-If a runtime response disagrees with the schema later, that is a bug —
-report it and wrap the test with test.skip + // FIXME: <ticket-url>.
-Do NOT loosen the schema to match buggy behavior.
+Location fixtures/api/schemas/{area}/[name]Schema.ts (run `ls fixtures/api/schemas/` first); pattern file fixtures/api/schemas/app/userSchema.ts. Mirror the documented contract exactly (field types, required and optional, nullability, nested shapes, the envelope) per the type-safety skill; export the schema and its inferred type. A runtime response that disagrees is a bug to report, never a reason to loosen the schema (api-testing skill).
 ```
 
-## Create a New Zod Schema (Fallback — No Documentation Available)
+## Create a schema without documentation (fallback)
 
-Use this only when no OpenAPI / Swagger documentation exists for the endpoint.
-
-```
-Create a Zod schema for [ENDPOINT]. No documentation exists for this endpoint,
-so we are capturing the observed contract.
-
-First, run `ls fixtures/api/schemas/` to find the correct area subdirectory.
-
-Then make a request to [API_URL/endpoint] to discover:
-- Actual response structure and field names
-- Data types for each field
-- Optional vs required fields
-- Nested objects or arrays
-- Error response formats
-
-Then generate the schema with:
-- Location: fixtures/api/schemas/{area}/[name]Schema.ts  (use real area name from ls)
-- Use z.strictObject() — never z.object()
-- Accurate field types based on the actual response
-- Proper Zod validators (z.email(), z.uuid(), z.url(), z.int(), etc.)
-- Exported TypeScript type
-- Flag missing documentation to the team as a follow-up
-```
-
-## Add Fields to Existing Schema
+Only when no OpenAPI or Swagger document exists for the endpoint.
 
 ```
-Add the following fields to [SCHEMA_NAME]:
-- [field1]: [type with validation rules]
-- [field2]: [type with validation rules]
+No documentation exists for [ENDPOINT]. Capture the observed contract by calling [API_URL/endpoint] and record the response structure, field types, optional versus required fields, nested shapes and the error bodies.
 
-Update the corresponding TypeScript type export.
-Keep z.strictObject(); do not weaken to z.object().
+Generate fixtures/api/schemas/{area}/[name]Schema.ts from the observations per the type-safety skill, and flag the missing documentation to the team.
+```
+
+## Add fields to an existing schema
+
+```
+Add to [SCHEMA_NAME]:
+- [field1]: [type and validation]
+- [field2]: [type and validation]
+
+Keep the schema strict and the type export in sync, per the type-safety skill.
 ```

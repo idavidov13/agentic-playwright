@@ -61,11 +61,11 @@ check_node() {
     if command -v node &> /dev/null; then
         local version
         version=$(node --version | sed 's/v//' | cut -d. -f1)
-        if [ "$version" -ge 20 ]; then
-            info "Node.js $(node --version) (meets >=20 requirement)"
+        if [ "$version" -ge 22 ]; then
+            info "Node.js $(node --version) (meets >=22 requirement)"
             return 0
         else
-            warn "Node.js $(node --version) found but >=20 is required"
+            warn "Node.js $(node --version) found but >=22 is required"
             return 1
         fi
     else

@@ -5,20 +5,22 @@
 # `skill-creator` (source: github anthropics/skills) and `playwright-cli` (source:
 # npm @playwright/cli, bundles SKILL.md). Three modes:
 #
-#   verify    -- (default) Re-hash the locally vendored SKILL.md files and
-#                exit non-zero if any hash diverges from `skills-lock.json`.
-#                Detects local tampering between deliberate updates.
+#   verify    -- (default) Re-hash each vendored skill DIRECTORY (every
+#                tracked file under .claude/skills/<name>/: SKILL.md, the
+#                references, the scripts) and exit non-zero if a hash
+#                diverges from `skills-lock.json`. Detects local tampering
+#                between deliberate updates. Part of `npm run check:skills`.
 #
-#   reinstall -- Fetch each upstream SKILL.md, overwrite the vendored copies
-#                in .claude/skills/<name>/SKILL.md and .cursor/skills/<name>/SKILL.md,
-#                and refresh the corresponding hash in `skills-lock.json`. The
-#                Copilot mirror at .github/instructions/<name>.instructions.md is
-#                NOT touched -- it carries Copilot-specific frontmatter and
-#                is hand-maintained per the v2.1 self-contained-trees policy.
+#   reinstall -- Fetch each upstream SKILL.md, overwrite the vendored copy in
+#                .claude/skills/<name>/SKILL.md and refresh the corresponding
+#                directory hash in `skills-lock.json`. Then run
+#                `npm run skills:sync` so the generated .agents/skills tree
+#                follows (check:skills-sync fails until it does).
 #
-#   update    -- Re-hash the local files (without fetching upstream) and write
-#                the new hashes into `skills-lock.json`. Use when intentional
-#                local edits to a vendored skill need to be re-locked.
+#   update    -- Re-hash the local directories (without fetching upstream) and
+#                write the new hashes into `skills-lock.json`. Use when
+#                intentional local edits to a vendored skill need to be
+#                re-locked.
 #
 # Sources are read from the lock; `sourceType` decides how to fetch:
 #   github  -> https://raw.githubusercontent.com/<source>/<ref|main>/<skillPath>
@@ -36,12 +38,17 @@ case "$MODE" in
     verify | reinstall | update) ;;
     *)
         echo "Usage: $0 [verify|reinstall|update]" >&2
-        echo "  verify    Re-hash local SKILL.md files; exit 1 on divergence (default)." >&2
+        echo "  verify    Re-hash the vendored skill directories; exit 1 on divergence (default)." >&2
         echo "  reinstall Fetch upstream SKILL.md, overwrite vendored copies, refresh lock." >&2
-        echo "  update    Re-hash local SKILL.md files and write new hashes into lock." >&2
+        echo "  update    Re-hash the vendored skill directories and write new hashes into lock." >&2
         exit 2
         ;;
 esac
+
+if [[ "$MODE" == "verify" && ! -d "${REPO_ROOT}/.claude/skills" ]]; then
+    echo "SKIP: .claude/skills not present (pruned at init) — no vendored skill to verify."
+    exit 0
+fi
 
 if [[ ! -f "$LOCK" ]]; then
     echo "ERROR: $LOCK not found" >&2
@@ -81,12 +88,32 @@ write_hash() {
             process.exit(1);
         }
         lock.skills[name].computedHash = hash;
+        lock.skills[name].hashScope = 'directory';
         fs.writeFileSync(path, JSON.stringify(lock, null, 2) + '\n');
     " "$LOCK" "$name" "$hash"
 }
 
 sha256() {
     shasum -a 256 "$1" | awk '{print $1}'
+}
+
+# Hash of a vendored skill directory: every git-tracked file under it
+# (sorted; relative path and content), so a changed reference or script is
+# drift too, not only SKILL.md. Outside a git checkout, every file under it
+# except build junk.
+# The file order is part of the hash, so it is sorted in the C locale: a
+# locale-aware sort puts `agents/` before `LICENSE.txt` on macOS and after it
+# on a Linux CI runner, and the same directory would hash differently.
+tree_hash() {
+    local rel="${1#"${REPO_ROOT}"/}" list
+    list="$(cd "${REPO_ROOT}" && git ls-files -- "${rel}" 2>/dev/null || true)"
+    if [[ -z "${list}" ]]; then
+        list="$(cd "${REPO_ROOT}" && find "${rel}" -type f ! -path '*/__pycache__/*' ! -name '.DS_Store' | LC_ALL=C sort)"
+    fi
+    printf '%s\n' "${list}" | LC_ALL=C sort | while IFS= read -r f; do
+        [[ -z "${f}" ]] && continue
+        printf '%s\t%s\n' "${f}" "$(shasum -a 256 "${REPO_ROOT}/${f}" 2>/dev/null | awk '{print $1}')"
+    done | shasum -a 256 | awk '{print $1}'
 }
 
 fetch_upstream() {
@@ -122,10 +149,9 @@ fetch_upstream() {
 errors=0
 processed=0
 
-# .claude is the canonical tree; .cursor mirrors it byte-for-byte. Copilot is hand-maintained.
+# .claude is the canonical tree; .agents/skills is generated from it by sync-skills.sh.
 LOCAL_TREES=(
     "${REPO_ROOT}/.claude/skills"
-    "${REPO_ROOT}/.cursor/skills"
 )
 
 while IFS=$'\t' read -r name source_type source ref skill_path expected_hash; do
@@ -133,6 +159,7 @@ while IFS=$'\t' read -r name source_type source ref skill_path expected_hash; do
     processed=$((processed + 1))
 
     canonical="${REPO_ROOT}/.claude/skills/${name}/SKILL.md"
+    skill_dir="${REPO_ROOT}/.claude/skills/${name}"
 
     case "$MODE" in
         verify)
@@ -141,12 +168,12 @@ while IFS=$'\t' read -r name source_type source ref skill_path expected_hash; do
                 errors=$((errors + 1))
                 continue
             fi
-            actual="$(sha256 "$canonical")"
+            actual="$(tree_hash "$skill_dir")"
             if [[ "$actual" != "$expected_hash" ]]; then
-                echo "DRIFT ${name} :: lock says ${expected_hash}, local is ${actual}"
+                echo "DRIFT ${name} :: lock says ${expected_hash}, local directory is ${actual}"
                 errors=$((errors + 1))
             else
-                echo "OK    ${name} :: hash matches lock"
+                echo "OK    ${name} :: directory hash matches lock"
             fi
             ;;
 
@@ -157,13 +184,13 @@ while IFS=$'\t' read -r name source_type source ref skill_path expected_hash; do
                 rm -f "$tmp"
                 continue
             fi
-            new_hash="$(sha256 "$tmp")"
             for tree in "${LOCAL_TREES[@]}"; do
                 dest="${tree}/${name}/SKILL.md"
                 mkdir -p "$(dirname "$dest")"
                 cp "$tmp" "$dest"
                 echo "WROTE ${dest}"
             done
+            new_hash="$(tree_hash "$skill_dir")"
             write_hash "$name" "$new_hash"
             echo "LOCK  ${name} :: hash refreshed -> ${new_hash}"
             rm -f "$tmp"
@@ -175,7 +202,7 @@ while IFS=$'\t' read -r name source_type source ref skill_path expected_hash; do
                 errors=$((errors + 1))
                 continue
             fi
-            new_hash="$(sha256 "$canonical")"
+            new_hash="$(tree_hash "$skill_dir")"
             if [[ "$new_hash" == "$expected_hash" ]]; then
                 echo "NOOP  ${name} :: hash already up to date"
                 continue
@@ -188,4 +215,7 @@ done < <(list_skills)
 
 echo
 echo "Mode: ${MODE}; Processed ${processed} skill(s); ${errors} issue(s)."
+if [[ "$MODE" == "reinstall" && "$errors" -eq 0 ]]; then
+    echo "NEXT  run 'npm run skills:sync' to regenerate .agents/skills from the canonical tree."
+fi
 [[ "$errors" -eq 0 ]] || exit 1

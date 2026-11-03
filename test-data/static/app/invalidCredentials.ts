@@ -10,7 +10,7 @@
  * Format: `.ts` with `as const` exports.
  * Static data files in this scaffold are TypeScript only; they may export
  * only literal values (no runtime imports, no functions, no computed values).
- * See `.claude/skills/data-strategy/SKILL.md` (Phase 3, Tier 2 — domain-specific).
+ * See the data-strategy skill (static-data tiers, Tier 2).
  */
 
 export const INVALID_EMAILS = [

@@ -47,12 +47,12 @@ export class NavigationComponent {
         return this.page.getByRole('link', { name: 'Sign in' });
     }
 
-    /** Logged-in user dropdown toggle; shows the user's name. */
+    // Logged-in user dropdown toggle; shows the user's name.
     get userMenu(): Locator {
         return this.page.getByTestId('nav-menu');
     }
 
-    /** Sign-out item inside the user dropdown (hidden until the menu opens). */
+    // Sign-out item inside the user dropdown (hidden until the menu opens).
     get signOutLink(): Locator {
         return this.page.getByTestId('nav-sign-out');
     }

@@ -1,9 +1,20 @@
+# Runs ESLint over the TypeScript that a PR actually changes, plus the
+# Constitution scan, then typechecks and Prettier-checks the whole project.
+# Pre-commit lint-staged already fixes staged files, but `git commit
+# --no-verify` bypasses it and edits made outside a checkout (GitHub web UI,
+# Dependabot) never see the hook; this job makes the same rules a gate that
+# cannot be skipped. skill-lint.yml is path-filtered to the rule trees and
+# never fires on pages/tests/fixtures/etc., so product code needs its own gate.
+# The Constitution scan (the hook's rules, --scan mode) runs over the same
+# files: the regex-only rules have no ESLint twin, so this is their CI gate
+# for every harness. A change to the lint rules themselves re-lints the whole
+# project: existing code can go red on a tightened rule with no .ts changing.
+# No path filter: Prettier covers Markdown, YAML and JSON too, so any push can
+# introduce formatting drift.
 name: Lint
 
-# Deterministic quality gate on the repository itself: TypeScript, ESLint,
-# and Prettier. Edits made outside the husky hook (GitHub web UI, Dependabot)
-# fail here with an obvious name instead of surfacing indirectly inside the
-# generated-project checks of the template smoke test.
+permissions:
+    contents: read
 
 on:
     push:
@@ -11,24 +22,98 @@ on:
     pull_request:
 
 jobs:
-    lint:
+    eslint:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0 # need the merge-base for a three-dot diff
 
             - uses: actions/setup-node@v7
               with:
-                  node-version: 20
+                  node-version: 22
                   cache: npm
 
-            - name: Install dependencies
-              run: npm ci
+            - run: npm ci --prefer-offline
 
-            - name: TypeScript
+            - name: ESLint and Constitution scan over changed TypeScript (whole project when the rules changed)
+              run: |
+                  set -euo pipefail
+                  scan() {
+                      # NUL-delimited paths on stdin; nothing to do without the hook.
+                      if [ -f .claude/scripts/enforce_constitution.py ]; then
+                          xargs -0 -r python3 .claude/scripts/enforce_constitution.py --scan
+                      else
+                          cat >/dev/null
+                      fi
+                  }
+                  base="${{ github.event.pull_request.base.sha }}"
+                  # Push events: diff against the pre-push tip so every commit in
+                  # the push is linted, not just the last one (HEAD~1 would).
+                  [ -z "$base" ] && base="${{ github.event.before }}"
+                  # A new branch pushes an all-zeros "before"; a force-push can
+                  # point at a commit we no longer have — full lint in both cases.
+                  if [ "$base" = "0000000000000000000000000000000000000000" ] \
+                      || ! git cat-file -e "$base" 2>/dev/null; then
+                      base=""
+                  fi
+                  rules_changed=""
+                  if [ -n "$base" ]; then
+                      rules_changed=$(git diff --name-only "$base"...HEAD -- eslint.config.mts tsconfig.json package-lock.json .claude/scripts/enforce_constitution.py)
+                  fi
+                  if [ -z "$base" ] || [ -n "$rules_changed" ]; then
+                      [ -z "$base" ] && echo "No base ref — linting the whole project." \
+                                     || { echo "Lint rules changed — linting the whole project:"; echo "$rules_changed"; }
+                      npm run lint
+                      git ls-files -z -- '*.ts' | scan
+                      exit 0
+                  fi
+                  # Three-dot: only what this branch authored, deletions excluded.
+                  # No `|| true`: a real git failure must fail the step (set -e),
+                  # not silently become "no changed files" — this gate's whole
+                  # point is that it cannot be skipped.
+                  files=$(git diff --name-only --diff-filter=d "$base"...HEAD -- '*.ts' '*.tsx')
+                  if [ -z "$files" ]; then
+                      echo "No changed TypeScript files to lint."
+                      exit 0
+                  fi
+                  echo "Linting:"; echo "$files"
+                  # -z: NUL-delimited straight from git — no quotePath C-quoting
+                  # of non-ASCII names, and newlines in filenames survive.
+                  # --no-warn-ignored: an explicitly-passed file that eslint
+                  # ignores must not trip --max-warnings 0.
+                  git diff -z --name-only --diff-filter=d "$base"...HEAD -- '*.ts' '*.tsx' \
+                    | xargs -0 -r npx eslint --max-warnings 0 --no-warn-ignored
+                  git diff -z --name-only --diff-filter=d "$base"...HEAD -- '*.ts' | scan
+
+            - name: Typecheck (whole project)
               run: npx tsc --noEmit
 
-            - name: ESLint
-              run: npx eslint .
+            # @playwright/cli depends on its own (often alpha) `playwright`. When
+            # the lock hoists that one to node_modules/playwright, a local
+            # `npm install` can link `npx playwright` to it and the runner finds
+            # no tests. The direct `playwright` pin in package.json prevents it;
+            # this step fails if the lock ever drifts from the runner again, and
+            # checks that the suite is collected at all (no browser, no env file).
+            - name: Test runner matches @playwright/test and collects the suite
+              run: |
+                  set -euo pipefail
+                  runner="$(node -p "require('./node_modules/@playwright/test/package.json').version")"
+                  hoisted="$(node -p "require('./node_modules/playwright/package.json').version")"
+                  echo "@playwright/test ${runner}, node_modules/playwright ${hoisted}"
+                  if [ "${runner}" != "${hoisted}" ]; then
+                      echo "::error::node_modules/playwright is ${hoisted}, not the runner's ${runner}: pin playwright to the @playwright/test version in package.json."
+                      exit 1
+                  fi
+                  out="$(npx playwright test --list 2>&1)" || { printf '%s\n' "$out"; exit 1; }
+                  total="$(printf '%s\n' "$out" | sed -nE 's/^Total: ([0-9]+) tests? in .*/\1/p' | tail -1)"
+                  printf '%s\n' "$out" | tail -1
+                  if [ "${total:-0}" -eq 0 ]; then
+                      echo "::error::npx playwright test --list collected no tests: the installed playwright is not the runner @playwright/test expects (keep the playwright pin in package.json)."
+                      exit 1
+                  fi
 
-            - name: Prettier
+            # lint-staged runs `prettier --write` only on staged files from a
+            # local checkout; this is the un-bypassable formatting gate.
+            - name: Prettier (whole project)
               run: npx prettier --check .
