@@ -250,7 +250,10 @@ RAW_CONTENT_RULES = {"no-eslint-disable-scaffold"}
 # blocks it (the Bash write-guard blocks the shell side of the same hole).
 # Humans edit these files normally; hooks only run on agent tool calls.
 PROTECTED_PATH = re.compile(
-    r"^(?:\.claude/scripts/|\.claude/settings(?:\.local)?\.json$|\.playwright-cli/)",
+    # Unanchored on the left: a nested copy (a git worktree under
+    # .claude/worktrees/, a scaffolded project inside this one) is the same
+    # hole one level down.
+    r"(?:^|/)(?:\.claude/scripts/|\.claude/settings(?:\.local)?\.json$|\.playwright-cli/)",
     re.I,
 )
 
@@ -584,6 +587,10 @@ def scan(paths: "list[str]") -> int:
     """Apply RULES to whole files on disk. Prints rule-id\tpath:line:text."""
     found = False
     for path in paths:
+        # --scan paths come from a shell, so a relative one is relative to the
+        # CWD (unlike hook payloads): resolve it here, or a scan run from
+        # `tests/` drops the `tests/` prefix and no path-scoped rule applies.
+        path = os.path.abspath(path)
         rel_path = repo_rel(path)
         if not os.path.isfile(path):
             continue

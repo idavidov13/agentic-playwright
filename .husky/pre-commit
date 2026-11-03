@@ -14,13 +14,15 @@ npx lint-staged
 staged="$(git diff --cached --name-only --no-renames --diff-filter=ACMRD)"
 touches() { printf '%s\n' "$staged" | grep -qE "$1"; }
 
-# Constitution scan over the staged TypeScript: the hook's rules on the files
+# Constitution scan over the staged TypeScript and static data (a JSON file
+# under test-data/static/ is itself a violation): the hook's rules on the files
 # as they are, so every AI tool (and every human commit) meets them at commit
-# time, not only Claude Code at write time.
-staged_ts="$(printf '%s\n' "$staged" | grep -E '\.ts$' || true)"
-if [ -n "$staged_ts" ] && [ -f .claude/scripts/enforce_constitution.py ]; then
-    printf '%s\n' "$staged_ts" | while IFS= read -r f; do [ -f "$f" ] && printf '%s\n' "$f"; done \
-        | xargs python3 .claude/scripts/enforce_constitution.py --scan
+# time, not only Claude Code at write time. Paths travel NUL-delimited, so a
+# name with spaces reaches the scanner whole. Deletions are excluded (ACMR).
+if [ -f .claude/scripts/enforce_constitution.py ] \
+    && [ -n "$(git diff --cached --name-only --no-renames --diff-filter=ACMR -- '*.ts' 'test-data/static/*.json')" ]; then
+    git diff --cached -z --name-only --no-renames --diff-filter=ACMR -- '*.ts' 'test-data/static/*.json' \
+        | xargs -0 python3 .claude/scripts/enforce_constitution.py --scan
 fi
 
 # Rule layer: the orchestrator, the Claude Code importer, the canonical and

@@ -35,6 +35,12 @@ import sys
 
 root = sys.argv[1]
 skills_dir = os.path.join(root, ".claude", "skills")
+# Claude tree pruned at init (--no-claude): lint the generated copy instead.
+if not os.path.isdir(skills_dir):
+    skills_dir = os.path.join(root, ".agents", "skills")
+if not os.path.isdir(skills_dir):
+    print("SKIP: no skill tree present (pruned at init) — nothing to check.")
+    sys.exit(0)
 
 POINTER = re.compile(r'→ "([^"]+)"')
 EXPLICIT = re.compile(r"skills/([a-z0-9-]+)/SKILL\.md")

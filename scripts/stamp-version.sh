@@ -65,7 +65,9 @@ if ! grep -q "\"version\": \"${VER}\"" "${tmp}"; then
     exit 2
 fi
 
-mv "${tmp}" "${PKG_FILE}"
+# Write in place (not mv): mktemp files are 0600, and mv would carry that
+# mode onto the stamped file.
+cat "${tmp}" > "${PKG_FILE}" && rm -f "${tmp}"
 echo "Stamped version ${VER} into package.json."
 
 # package-lock.json carries the root version twice: at the top level and in
@@ -93,6 +95,8 @@ if [[ -f "${LOCK_FILE}" ]]; then
         exit 2
     fi
 
-    mv "${tmp}" "${LOCK_FILE}"
+    # Write in place (not mv): mktemp files are 0600, and mv would carry that
+    # mode onto the stamped file.
+    cat "${tmp}" > "${LOCK_FILE}" && rm -f "${tmp}"
     echo "Stamped version ${VER} into package-lock.json (root + packages[\"\"])."
 fi

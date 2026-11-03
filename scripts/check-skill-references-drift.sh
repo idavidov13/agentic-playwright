@@ -48,8 +48,10 @@ collect_anchors() {
 # is left to check-heading-pointers.sh and check-skill-crossrefs.sh.
 extract_reference_links() {
     local file="$1"
+    # The last sed drops sentence punctuation the character class swallows:
+    # "see references/foo.md." is a link to foo.md, not to "foo.md.".
     grep -oE '(^|[^/])references/[A-Za-z0-9._/-]+(#[A-Za-z0-9._-]+)?' "${file}" \
-        | sed -E 's/^[^r]//' || true
+        | sed -E -e 's/^[^r]//' -e 's/\.+$//' || true
 }
 
 errors=0

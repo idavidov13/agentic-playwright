@@ -107,9 +107,13 @@ in_allowlist() {
 }
 
 # Tracked basenames (with and without extension) and path segments, once.
-# Outside a git checkout (`--skip-git`), every file except node_modules.
-tracked_names="$( { git -C "${REPO_ROOT}" ls-files 2>/dev/null \
-    || (cd "${REPO_ROOT}" && find . -type f -not -path './node_modules/*' -not -path './.git/*' | sed 's|^\./||'); } | awk -F/ '
+# Outside a git checkout (`--skip-git`), or in a fresh `git init` with nothing
+# added yet (ls-files succeeds but lists nothing), every file except node_modules.
+file_list="$(git -C "${REPO_ROOT}" ls-files 2>/dev/null || true)"
+if [[ -z "${file_list}" ]]; then
+    file_list="$(cd "${REPO_ROOT}" && find . -type f -not -path './node_modules/*' -not -path './.git/*' | sed 's|^\./||')"
+fi
+tracked_names="$(printf '%s\n' "${file_list}" | awk -F/ '
     { for (i = 1; i <= NF; i++) { print $i; seg = $i; sub(/\.[A-Za-z0-9]+$/, "", seg); print seg } }' | sort -u)"
 
 is_tracked_name() {

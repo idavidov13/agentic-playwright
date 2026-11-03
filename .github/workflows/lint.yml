@@ -65,13 +65,16 @@ jobs:
                       [ -z "$base" ] && echo "No base ref — linting the whole project." \
                                      || { echo "Lint rules changed — linting the whole project:"; echo "$rules_changed"; }
                       npm run lint
-                      git ls-files -z -- '*.ts' | scan
+                      git ls-files -z -- '*.ts' 'test-data/static/*.json' | scan
                       exit 0
                   fi
                   # Three-dot: only what this branch authored, deletions excluded.
                   # No `|| true`: a real git failure must fail the step (set -e),
                   # not silently become "no changed files" — this gate's whole
                   # point is that it cannot be skipped.
+                  # Static data first: a JSON file under test-data/static/ is a
+                  # violation on its own, even in a change with no TypeScript.
+                  git diff -z --name-only --diff-filter=d "$base"...HEAD -- 'test-data/static/*.json' | scan
                   files=$(git diff --name-only --diff-filter=d "$base"...HEAD -- '*.ts' '*.tsx')
                   if [ -z "$files" ]; then
                       echo "No changed TypeScript files to lint."

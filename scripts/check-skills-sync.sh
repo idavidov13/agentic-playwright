@@ -36,16 +36,26 @@ trap 'rm -rf "${TMP}"' EXIT
 
 bash "${SYNC}" --output "${TMP}/skills" >/dev/null
 
-if diff -r -q "${TMP}/skills" "${DST}" >"${TMP}/diff.txt" 2>&1; then
+# Local junk the generator never copies (sync-skills.sh JUNK) and git ignores
+# (.DS_Store, __pycache__) is not drift: skip it on both sides.
+if diff -r -q -x '__pycache__' -x '.DS_Store' -x '*-workspace' \
+    "${TMP}/skills" "${DST}" >"${TMP}/diff.txt" 2>&1; then
     if python3 - "${TMP}/skills" "${DST}" <<'PYEOF'
+import fnmatch
 import os
 import stat
 import sys
 
+JUNK = ("__pycache__", ".DS_Store", "*-workspace")
+
+def junk(name):
+    return any(fnmatch.fnmatch(name, j) for j in JUNK)
+
 def walk(root):
     out = {}
     for dirpath, dirnames, filenames in os.walk(root):
-        for name in dirnames + filenames:
+        dirnames[:] = [d for d in dirnames if not junk(d)]
+        for name in dirnames + [f for f in filenames if not junk(f)]:
             full = os.path.join(dirpath, name)
             rel = os.path.relpath(full, root)
             st = os.lstat(full)
@@ -69,7 +79,7 @@ for rel in sorted(set(fresh) | set(committed)):
 sys.exit(1 if bad else 0)
 PYEOF
     then
-        count="$(find "${DST}" -type f | wc -l | tr -d ' ')"
+        count="$(find "${DST}" -type f ! -name '.DS_Store' ! -path '*/__pycache__/*' | wc -l | tr -d ' ')"
         echo "Skills sync OK: .agents/skills matches .claude/skills (${count} files, content and modes)."
         exit 0
     fi

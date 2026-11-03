@@ -1,3 +1,9 @@
- # Shell scripts and Dockerfiles must use LF — CRLF breaks bash shebangs and Docker RUN directives in Linux containers
-*.sh text eol=lf
-Dockerfile text eol=lf
+# LF everywhere, on every platform. The gates read Markdown and JSON byte for
+# byte (heading matches in AGENTS.md, directory hashes in skills-lock.json), so
+# a Windows checkout with core.autocrlf=true must not turn them into CRLF;
+# CRLF also breaks bash shebangs and Docker RUN directives in Linux containers.
+* text=auto eol=lf
+
+# Windows batch files are the one exception: cmd.exe expects CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf

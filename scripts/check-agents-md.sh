@@ -150,7 +150,7 @@ while IFS= read -r name; do
     if printf '%s' "${disk_skills}" | grep -F -x -q -- "${name}"; then
         checked=$((checked + 1))
     else
-        echo "INDEX AGENTS.md :: \`${name}\` is indexed but .claude/skills/${name}/SKILL.md is missing (or the name is excluded)"
+        echo "INDEX AGENTS.md :: \`${name}\` is indexed but ${SKILLS_DIR#"${REPO_ROOT}/"}/${name}/SKILL.md is missing (or the name is excluded)"
         errors=$((errors + 1))
     fi
 done <<< "${index_skills}"
@@ -158,7 +158,7 @@ done <<< "${index_skills}"
 while IFS= read -r name; do
     [[ -z "${name}" ]] && continue
     if ! printf '%s\n' "${index_skills}" | grep -F -x -q -- "${name}"; then
-        echo "INDEX AGENTS.md :: .claude/skills/${name}/ exists but is not in the Skills Index"
+        echo "INDEX AGENTS.md :: ${SKILLS_DIR#"${REPO_ROOT}/"}/${name}/ exists but is not in the Skills Index"
         errors=$((errors + 1))
     fi
 done <<< "${disk_skills}"
