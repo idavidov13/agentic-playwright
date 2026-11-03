@@ -37,12 +37,6 @@ Zero questions. Scaffolds the framework, installs dependencies and a browser, an
 by running the smoke test against a live demo application — **you see green before
 writing a line.** Under 5 minutes on normal broadband.
 
-## Full System Explained Live
-
-[Debbie O'Brien](https://github.com/debs-obrien) and [Ivan Davidov](https://github.com/idavidov13) will walk through the architecture at C3, "Orchestrating Agentic Test Automation with Playwright". October 21st, online, organized by Packt
-
-[Registrater here](https://www.eventbrite.co.uk/e/orchestrating-agentic-test-automation-with-playwright-c3-tickets-1998169208893?aff=Ivanc3&discount=ivan30)
-
 ## Without the rulebook vs with it
 
 The same prompt — _"write a test for the product search"_ — to the same AI assistant:
@@ -145,13 +139,14 @@ _Not affiliated with Microsoft. [Playwright](https://playwright.dev/) is an open
 - **Pre-Commit Drift Lints** -- `npm run check:skills` runs eight gates: the `AGENTS.md` budget and index, generated-tree parity (content and modes), the skill authoring caps, the vendored-skill lock, Constitution anchors in each skill's Critical block (and hook rule ids mapped to Constitution rows), `references/` pointers, heading and step pointers, and cross-skill names. `.husky/pre-commit` runs them when their inputs are staged (a commit touching none of them pays for lint-staged and the scan alone); `skill-lint.yml` runs all of them in CI.
 - **Upstream Skill Sync** -- `skills-lock.json` records the SHA-256 of the locally vendored copies of `skill-creator` (from `anthropics/skills`) and `playwright-cli` (from `@playwright/cli`). `npm run skills:verify` re-hashes the local files and exits non-zero on drift; `npm run skills:reinstall` fetches upstream, overwrites `.claude/skills/<name>/SKILL.md` and refreshes the lock (then `npm run skills:sync` regenerates `.agents/skills/`); `npm run skills:update` re-locks after intentional local edits.
 - **Playwright CLI Exploration** -- `playwright-cli` is the default browser exploration path for UI discovery, tracing, storage inspection, and flow capture
-- **Out-of-the-Box Anthropic Skills** -- `playwright-cli` and `skill-creator` are reinstalled fresh from the upstream Anthropic packages and tracked via `skills-lock.json` for reproducible installs
+- **Out-of-the-Box Vendored Skills** -- `playwright-cli` (Microsoft's `@playwright/cli`) and `skill-creator` (Anthropic's `anthropics/skills`) are reinstalled fresh from upstream and tracked via `skills-lock.json` for reproducible installs
 - **AI Task Workflows Playbook** -- [`AI-WORKFLOWS.md`](AI-WORKFLOWS.md) maps the exact step sequence for every common flow (API suite for a controller, functional tests from a ticket, E2E suite, debugging, refactors, and more) to its owning skill and phase, with an anti-drift guardrails table -- so AI-assisted execution stays consistent across sessions
 
 ## Prerequisites
 
 - **Node.js** v22.x or later
 - **npm** v10.x or later
+- **Python 3**, reachable as `python3`: the Constitution hook, its pre-commit scan and three of the skill gates run on it. On Windows, the python.org installer adds only `python` and `py`, and a bare `python3` may open the Microsoft Store stub. Claude Code then blocks every Write and Edit, because the hook fails closed. Use the Dev Container or WSL, or make `python3` resolve to a real Python 3.
 
 ## Quick Start: npm create
 
@@ -190,7 +185,7 @@ The fastest way to get a fully working environment. Requires [Docker Desktop](ht
 
     ```bash
     git clone <your-repository-url>   # replace with your fork/clone URL
-    cd playwright-scaffold
+    cd agentic-playwright
     ```
 
 2. **Open in Cursor/VS Code** and accept the prompt to **"Reopen in Container"** (or run `Dev Containers: Reopen in Container` from the Command Palette).
@@ -245,7 +240,7 @@ For terminal-based workflows or if you prefer not to use Docker. Works on macOS 
 
     ```bash
     git clone <your-repository-url>   # replace with your fork/clone URL
-    cd playwright-scaffold
+    cd agentic-playwright
     ```
 
 2. **Run the setup script:**
@@ -274,7 +269,7 @@ If you prefer to install dependencies manually. Steps 1-3 and 5-6 are identical 
 
     ```bash
     git clone <your-repository-url>   # replace with your fork/clone URL
-    cd playwright-scaffold
+    cd agentic-playwright
     ```
 
 2. **Install npm dependencies:**
@@ -524,7 +519,7 @@ root/
 │   ├── prompts/
 │   │   └── pr-reviewer.prompt.md  # Copilot prompt: review a branch against AGENTS.md
 │   ├── workflows/
-│   │   ├── lint.yml           # ESLint on changed TypeScript, tsc, the test-runner check, Prettier (every push and PR)
+│   │   ├── lint.yml           # ESLint on changed TypeScript, tsc, the test-runner check, Prettier (pushes to main, every PR)
 │   │   ├── skill-lint.yml     # The eight rule-layer gates and the version gate
 │   │   ├── playwright.yml     # API tests against the demo app (non-blocking)
 │   │   ├── template-smoke.yml # Pack the initializer, scaffold projects, run their gates
@@ -639,12 +634,14 @@ The `playwright.config.ts` file contains all test runner settings:
 
 ### Browser Projects
 
-| Project    | Description             | Dependencies |
-| ---------- | ----------------------- | ------------ |
-| `setup`    | Authentication setup    | None         |
-| `chromium` | Main tests on Chrome    | `setup`      |
-| `firefox`  | Firefox (commented out) | `setup`      |
-| `webkit`   | Safari (commented out)  | `setup`      |
+| Project     | Description                                  | Dependencies            |
+| ----------- | -------------------------------------------- | ----------------------- |
+| `setup-api` | API token over HTTP (`auth-api.setup.ts`)    | None                    |
+| `setup-ui`  | Browser storage state (`auth.setup.ts`)      | None                    |
+| `api`       | API tests, request context only (no browser) | `setup-api`             |
+| `chromium`  | Main tests on Chrome                         | `setup-api`, `setup-ui` |
+| `firefox`   | Firefox (commented out)                      | `setup-api`, `setup-ui` |
+| `webkit`    | Safari (commented out)                       | `setup-api`, `setup-ui` |
 
 ### Timeouts
 
@@ -1584,7 +1581,7 @@ Verify with `git ls-files --eol -- scripts/*.sh` -- all files should show `w/lf`
 
 ### Auth setup fails and all tests are skipped
 
-The `setup` project runs before all test projects. If it fails (wrong credentials, app not reachable), all dependent projects are skipped entirely. Check:
+The setup projects run before the test projects: `setup-api` before `api` and `chromium`, `setup-ui` before `chromium`. If one fails (wrong credentials, app not reachable), every project that depends on it is skipped entirely. Check:
 
 1. Your `APP_URL` and `API_URL` are reachable from your machine
 2. Your `APP_EMAIL` and `APP_PASSWORD` are valid credentials

@@ -8,7 +8,7 @@ assignees: ''
 
 ## Which agent
 
-<!-- Claude Code / Cursor / GitHub Copilot / other (+ model if known) -->
+<!-- Claude Code / Codex / Cursor / GitHub Copilot / other (+ model if known) -->
 
 ## Which rule
 

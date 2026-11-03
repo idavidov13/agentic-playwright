@@ -315,19 +315,19 @@ The rules most often skipped under time pressure — and the one that catches ea
 
 ## Command Cheat-Sheet
 
-| Command                                                            | Purpose                                     |
-| ------------------------------------------------------------------ | ------------------------------------------- |
-| `npm test`                                                         | All non-destructive tests (parallel).       |
-| `npm run test:smoke` / `:sanity` / `:regression` / `:api` / `:e2e` | Run one tag.                                |
-| `npm run test:destructive`                                         | Destructive suite only (`--workers=1`).     |
-| `npx playwright test <file>`                                       | Run a single spec.                          |
-| `npm run test:ui`                                                  | UI Mode — time-travel debugging.            |
-| `npm run test:debug`                                               | Inspector — step through a test.            |
-| `npm run test:headed`                                              | Watch the browser run.                      |
-| `npm run report`                                                   | Open the HTML report / Trace Viewer.        |
-| `CI=1 npx playwright test <file> --workers=1 --retries=0`          | Replay CI conditions locally.               |
-| `npm run lint` / `lint:fix` / `format`                             | ESLint / autofix / Prettier.                |
-| `npm run check:skills`                                             | Validate the AI rules layer (twelve gates). |
+| Command                                                            | Purpose                                    |
+| ------------------------------------------------------------------ | ------------------------------------------ |
+| `npm test`                                                         | All non-destructive tests (parallel).      |
+| `npm run test:smoke` / `:sanity` / `:regression` / `:api` / `:e2e` | Run one tag.                               |
+| `npm run test:destructive`                                         | Destructive suite only (`--workers=1`).    |
+| `npx playwright test <file>`                                       | Run a single spec.                         |
+| `npm run test:ui`                                                  | UI Mode — time-travel debugging.           |
+| `npm run test:debug`                                               | Inspector — step through a test.           |
+| `npm run test:headed`                                              | Watch the browser run.                     |
+| `npm run report`                                                   | Open the HTML report / Trace Viewer.       |
+| `CI=1 npx playwright test <file> --workers=1 --retries=0`          | Replay CI conditions locally.              |
+| `npm run lint` / `lint:fix` / `format`                             | ESLint / autofix / Prettier.               |
+| `npm run check:skills`                                             | Validate the AI rules layer (eight gates). |
 
 ---
 

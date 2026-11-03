@@ -14,15 +14,16 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ### Constitution hook
 
-- Eighteen rules (was seven), each mapped to the Constitution row it enforces: hard waits (including `timers/promises`), loose schemas, XPath, `@playwright/test` imports, JSON or runtime code in static data, unknown, multiple or missing tags, tags on `test.describe()`, manual page-object instantiation, hardcoded URLs, JSDoc on locator getters, inline assertion text, inline universal invalids and inline `eslint-disable`.
+- Eighteen rules (was seven), each mapped to the Constitution row it enforces: hard waits (including `timers/promises`), loose schemas, XPath, `@playwright/test` imports, JSON or runtime code in static data, unknown, multiple or missing tags, the retired `@functional` tag, tags on `test.describe()`, manual page-object instantiation, hardcoded URLs, JSDoc on locator getters, inline assertion text, inline universal invalids and inline `eslint-disable`.
 - An `Edit` is judged on the file it produces, and comments are ignored. A new page object needs a fresh `playwright-cli` exploration (`scripts/playwright-cli.sh` records it). The hook layer itself is write-protected. A crash fails closed.
-- **`--scan` mode** runs the same rules over files on disk: pre-commit scans the staged TypeScript and `lint.yml` the changed TypeScript, so Codex, Cursor and Copilot meet the rules at commit time.
+- **`--scan` mode** runs the same rules over files on disk: pre-commit scans the staged TypeScript and static data and `lint.yml` the changed ones, so Codex, Cursor and Copilot meet the rules at commit time.
 
 ### Gates, pre-commit and CI
 
 - `npm run check:skills` runs eight gates: `check:agents-md` (budget, index, markers), `check:skills-sync` (the generated tree, content and modes), `check:skills-shape` (authoring caps), `skills:verify` (vendored skill directories hashed against `skills-lock.json`), `check:skills-drift` (Constitution rows, skill anchors, hook rule ids), `check:skills-references`, `check:skills-headings` (cross-skill step pointers) and `check:skills-crossrefs`. The gates also pass in a project created with `--no-claude` or `--skip-git`.
-- `.husky/pre-commit`: lint-staged (`--max-warnings 0`), the scan, the rule-layer gates when their inputs are staged (deletions and renames included), the version gate.
+- `.husky/pre-commit`: lint-staged (`--max-warnings 0`), the scan (paths NUL-delimited, so names with spaces are scanned whole), the rule-layer gates when their inputs are staged (deletions and renames included), the version gate.
 - `lint.yml` lints the changed TypeScript plus the scan, and the whole project when a lint rule changed. It also fails when `node_modules/playwright` is not the `@playwright/test` version or `npx playwright test --list` collects no tests (no browser, no env file). `npm run check:version` also asserts the two root versions in `package-lock.json`.
+- `.gitattributes` checks out every text file with LF on every platform (Windows batch files with CRLF): the gates read Markdown and JSON byte for byte, so a `core.autocrlf=true` checkout no longer turns them red.
 
 ### Product fixes
 
@@ -37,7 +38,8 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ### Initializer
 
-- `--no-claude` prunes `.claude/` and `CLAUDE.md` (`AGENTS.md` stays); the new `--no-agents` prunes `.agents/`; `--no-copilot` prunes the PR-review prompt only; `--no-cursor` is accepted and prunes nothing (Cursor reads `AGENTS.md` and `.agents/skills/`).
+- `--no-claude` prunes `.claude/` and `CLAUDE.md` (`AGENTS.md` stays); the new `--no-agents` prunes `.agents/`; `--no-copilot` prunes the PR-review prompt only; `--no-cursor` is accepted and prunes nothing (Cursor reads `AGENTS.md` and `.agents/skills/`). `--no-claude` with `--no-agents` keeps `.agents/`: `AGENTS.md` always ships and needs one skill tree.
+- "Next steps" lists `npm run playwright-cli:install-browsers`.
 - The template smoke test scaffolds both pruned variants and runs the eight gates in each.
 
 ### Updating an existing project
@@ -45,8 +47,8 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 The initializer never updates an existing project. By hand:
 
 - Delete `.cursor/`, `.github/instructions/`, `.github/skills/` and `.github/copilot-instructions.md`.
-- Copy from this release: `AGENTS.md`, `CLAUDE.md`, `.claude/skills/`, `.claude/scripts/enforce_constitution.py`, `.claude/settings.json`, `.agents/README.md`, `scripts/` (every gate script and `rules-manifest.txt`), `.husky/pre-commit`, `.github/workflows/lint.yml` and `skill-lint.yml`, `scripts/install-playwright-cli-browsers.js`, `.github/prompts/pr-reviewer.prompt.md`, `skills-lock.json`, `eslint.config.mts`, `playwright.config.ts`, both setup files under `tests/app/` (`auth.setup.ts` and the new `auth-api.setup.ts`), `helpers/app/createStorageState.ts`, `fixtures/api/api-request-fixture.ts`, `fixtures/pom/page-object-fixture.ts`, `fixtures/api/schemas/util/errorResponseSchema.ts`, `config/`, `enums/app/app.ts`.
-- Take the `scripts`, `devDependencies`, `dependencies`, `lint-staged` and `engines` blocks of `package.json`, then `npm install`, `npm run skills:sync`, `npm run check:skills`, `npm run lint`.
+- Copy from this release: `AGENTS.md`, `CLAUDE.md`, `.gitattributes`, `.gitignore`, `.prettierignore`, `.devcontainer/`, `.claude/skills/`, `.claude/scripts/enforce_constitution.py`, `.claude/settings.json`, `.agents/README.md`, `scripts/` (every gate script and `rules-manifest.txt`), `.husky/pre-commit`, `.github/workflows/lint.yml`, `skill-lint.yml` and `playwright.yml`, `scripts/install-playwright-cli-browsers.js`, `.github/prompts/pr-reviewer.prompt.md`, `skills-lock.json`, `eslint.config.mts`, `playwright.config.ts`, both setup files under `tests/app/` (`auth.setup.ts` and the new `auth-api.setup.ts`), `helpers/app/createStorageState.ts`, `fixtures/api/api-request-fixture.ts`, `fixtures/pom/page-object-fixture.ts`, `fixtures/api/schemas/util/errorResponseSchema.ts`, `pages/components/navigation.component.ts` (its locator getters lose their JSDoc, which the hook now rejects), `config/`, `enums/app/app.ts`.
+- Take the `scripts`, `devDependencies`, `dependencies`, `lint-staged` and `engines` blocks of `package.json`, then `npm install`, `npm run playwright-cli:install-browsers`, `npm run skills:sync`, `npm run check:skills`, `npm run lint`.
 
 ## v1.0.2 -- Template Payload Excludes Repo-Only CI -- 2026-09-21
 

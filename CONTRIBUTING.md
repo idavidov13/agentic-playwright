@@ -9,8 +9,8 @@ This repository is unusual in one important way: **the AI rule trees are part of
 That means contributions are checked by more gates than a typical repo:
 
 1. **ESLint + Prettier + `tsc --noEmit`** — standard code quality.
-2. **Skill lint (`npm run lint:skills`)** — structural checks on every `SKILL.md`.
-3. **Cross-reference and drift gates** — skills reference each other and the Constitution; the gates fail if a rename or rule change leaves a dangling reference or lets the Claude/Cursor/Copilot trees drift apart.
+2. **Skill gates (`npm run check:skills`)** — eight gates over the rules layer: the `AGENTS.md` budget and Skills Index, skill shape, vendored-skill hashes, and drift between the Constitution, the skills and the hook.
+3. **Cross-reference and sync gates** — part of the same eight: skills reference each other and the Constitution, and the gates fail if a rename or rule change leaves a dangling reference or lets the generated `.agents/skills/` drift from `.claude/skills/`.
 4. **Version single-sourcing (`npm run check:version`)** — `VERSION`, `package.json`, and the latest `CHANGELOG.md` heading must agree.
 
 Run everything locally before pushing:
@@ -18,7 +18,7 @@ Run everything locally before pushing:
 ```bash
 npm ci
 npx tsc --noEmit && npx eslint . && npx prettier --check .
-npm run lint:skills && npm run check:version
+npm run check:skills && npm run check:version
 npx playwright test        # requires env/.env.dev — see README "Environment Variables"
 ```
 
