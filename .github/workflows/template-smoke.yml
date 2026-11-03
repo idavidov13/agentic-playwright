@@ -74,7 +74,7 @@ jobs:
             - name: Pruned variant — no .agents tree, no Copilot prompt
               run: |
                   cd /tmp/smoke
-                  node package/bin/create.js no-agents --demo --no-agents --no-copilot --skip-install --skip-git
+                  node package/bin/create.js no-agents --demo --no-agents --skip-install --skip-git
                   cd no-agents
                   bash scripts/check-agents-md.sh
                   bash scripts/check-skills-sync.sh

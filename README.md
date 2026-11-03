@@ -30,7 +30,7 @@ here, and name the project after this folder" (a fresh `git clone` of an empty r
 works too). Prefer a new subfolder? Pass a name instead of `.`:
 
 ```bash
-npm create agentic-playwright . -- --demo
+npm create agentic-playwright@latest . -- --demo
 ```
 
 Zero questions. Scaffolds the framework, installs dependencies and a browser, and ends
@@ -154,7 +154,7 @@ The fastest path — scaffold a fresh project with everything wired, straight in
 directory you are standing in:
 
 ```bash
-npm create agentic-playwright . -- --demo
+npm create agentic-playwright@latest . -- --demo
 ```
 
 **Why the `.`?** It scaffolds into the **current directory** and names the project
@@ -163,14 +163,22 @@ repo for your tests. The directory must be empty apart from repo bookkeeping lik
 `.git`; if a git repo already exists there, the initializer detects it and skips
 `git init`. Prefer a new subfolder instead? Pass a name:
 
-```bash
-npm create agentic-playwright my-tests -- --demo  # same, but in ./my-tests
-npm create agentic-playwright .                   # interactive — 4 questions
-npm create agentic-playwright . -- --bare         # your own app URLs
-```
+| Command                                                   | What it does                                                    |
+| --------------------------------------------------------- | --------------------------------------------------------------- |
+| `npm create agentic-playwright@latest . -- --demo`        | No questions: demo API, install, smoke test. Green in minutes.  |
+| `npm create agentic-playwright@latest .`                  | Interactive: Claude Code? Other agents? Demo API or your app?   |
+| `npm create agentic-playwright@latest . -- --bare`        | Your own app: asks for its URLs and credentials, no smoke test. |
+| `npm create agentic-playwright@latest my-tests -- --demo` | Same as the first, into a new `./my-tests` folder.              |
+| `npm create agentic-playwright@latest -- --help`          | Every flag.                                                     |
 
-Useful flags: `--no-claude` (prune Claude Code's files), `--no-agents` (prune the skills
-Codex, Cursor and Copilot read), `--no-copilot` (prune the PR-review prompt), `--yes`, `--skip-install`, `--skip-browsers`, `--skip-git`, `--skip-smoke`.
+With npm, the `--` passes the flags through npm to the initializer; pnpm, yarn and bun
+do not need it.
+
+**Flags:** `--no-claude` leaves out Claude Code (`.claude/`, `CLAUDE.md`); `--no-agents`
+leaves out the other agents, such as Codex, Cursor and GitHub Copilot (`.agents/`,
+`.github/prompts/`). `AGENTS.md` always ships, so at least one skill tree stays.
+`--bare --yes` asks nothing and writes placeholders to `env/.env.dev`. `--skip-install`,
+`--skip-browsers`, `--skip-git` and `--skip-smoke` skip that step.
 
 ## Quick Start: Dev Container
 
