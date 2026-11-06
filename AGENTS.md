@@ -9,7 +9,7 @@ Rules for every agent in this repository. Skills hold the detail; load the one t
 ### MUST
 
 - **Dependency Injection**: page objects are fixtures from `fixtures/pom/test-options.ts`.
-- **Imports**: `test` and `expect` from `fixtures/pom/test-options.ts` only, never `@playwright/test`.
+- **Imports**: `test` and `expect` from `fixtures/pom/test-options.ts` only, never `@playwright/test` in spec files.
 - **Selectors**: `getByRole()` > `getByLabel()` > `getByPlaceholder()` > `getByText()` > `getByTestId()`.
 - **Type Safety**: Zod schemas in `fixtures/api/schemas/`; no `any`.
 - **Strict Schemas**: API schemas use `z.strictObject()`.
@@ -40,7 +40,7 @@ Rules for every agent in this repository. Skills hold the detail; load the one t
 - **No Tags on Describe**: never on `test.describe()`.
 - **No Multiple Tags**: exactly one of `@smoke`, `@sanity`, `@regression`, `@e2e`, `@api`, `@destructive`; never `@functional`. `@destructive` alone when shared state (locale, roles, settings) is mutated, not for own-data cleanup.
 - **No Magic Numbers**: constants in `config/` or `enums/`.
-- **No Manual Instantiation**: never `new PageObject(page)`.
+- **No Manual Instantiation**: never `new PageObject(page)` inside test files.
 - **No Loose Schemas**: never `z.object()`.
 - **No JSDoc on Locators**.
 - **No Hardcoded Test Content**: names, labels and text come from factories.
