@@ -19,6 +19,7 @@ Rules for every agent in this repository. Skills hold the detail; load the one t
 - **Linting**: ESLint and Prettier clean, zero warnings.
 - **Data Strategy**: invalid arrays in `test-data/static/util/invalid-values.ts`; curated sets in `test-data/static/{area}/`; happy-path data from `test-data/factories/{area}/`.
 - **State Cleanup**: a test that mutates persistent state reverts it in `afterEach` or `afterAll`.
+- **Test Isolation**: independent tests; `test.beforeEach` for setup.
 - **API Test Steps**: two or more API calls means one `test.step()` per call.
 - **Test Verification**: run `npx playwright test <file>` after editing a spec; red is never done.
 - **Explore Before Generate**: API: build from the OpenAPI document; live capture only when none exists, flagged; a runtime mismatch is `test.skip` plus `// FIXME:`, never a loosened schema. UI: you explore with `playwright-cli` (read that skill first) before you write any `pages/**` file, UI spec or selector; cannot run means stop and tell the human.
@@ -26,9 +27,8 @@ Rules for every agent in this repository. Skills hold the detail; load the one t
 ### SHOULD
 
 - **Data Generation**: Faker factories in `test-data/factories/` for happy-path values, UI content too.
-- **Test Isolation**: independent tests; `test.beforeEach` for setup.
 - **Test Steps**: `test.step()` with Given/When/Then.
-- **JSDoc on Actions**: JSDoc (`@param`, `@returns`) on action methods only.
+- **JSDoc on Actions**: in page objects, JSDoc (`@param`, `@returns`) on action methods only.
 - **Enums for Strings**: repeated strings come from `enums/`.
 
 ### WON'T
@@ -39,11 +39,11 @@ Rules for every agent in this repository. Skills hold the detail; load the one t
 - **No `any`**.
 - **No Tags on Describe**: never on `test.describe()`.
 - **No Multiple Tags**: exactly one of `@smoke`, `@sanity`, `@regression`, `@e2e`, `@api`, `@destructive`; never `@functional`. `@destructive` alone when shared state (locale, roles, settings) is mutated, not for own-data cleanup.
-- **No Magic Numbers**: constants in `config/` or `enums/`.
+- **No Magic Numbers**: constants in `config/`, `playwright.config.ts` or `enums/`.
 - **No Manual Instantiation**: never `new PageObject(page)` inside test files.
 - **No Loose Schemas**: never `z.object()`.
 - **No JSDoc on Locators**.
-- **No Hardcoded Test Content**: names, labels and text come from factories.
+- **No Hardcoded Test Content**: test-created names, labels and text come from factories.
 - **No Explore-Only Files**: never commit a page-dump or probe spec.
 - **No Empty-Body-Only 400**: per-field omission and invalid-type `for...of` tests.
 - **No Feedback-Less POM**: form and CRUD page objects have success, error and validation selectors.

@@ -967,7 +967,8 @@ Use semantic locators in this order of preference:
 3. `page.getByPlaceholder()` -- Placeholder text
 4. `page.getByText()` -- Text content
 5. `page.getByTestId()` -- Test IDs (fallback)
-6. `page.locator()` -- CSS/XPath (last resort)
+
+XPath and CSS class or id selectors are not allowed. When no semantic option fits, ask for a test id.
 
 ### Registering Page Objects
 
@@ -1036,23 +1037,31 @@ await dashboardPage.nav.logout();
 Use the `apiRequest` fixture for all API calls in tests:
 
 ```typescript
-import { expect, test } from '../../../fixtures/pom/test-options';
+import { ApiEndpoints } from '../../../enums/app/app';
 import {
     UserResponse,
     UserResponseSchema,
 } from '../../../fixtures/api/schemas/app/userSchema';
+import { expect, test } from '../../../fixtures/pom/test-options';
 
-test('should return user data', { tag: '@api' }, async ({ apiRequest }) => {
-    const { status, body } = await apiRequest<UserResponse>({
-        method: 'GET',
-        url: '/api/users/me',
-        baseUrl: process.env.API_URL,
-        headers: process.env.ACCESS_TOKEN,
-    });
+test(
+    'should return 200 and user data for valid credentials',
+    { tag: '@api' },
+    async ({ apiRequest }) => {
+        const { status, body } = await apiRequest<UserResponse>({
+            method: 'POST',
+            url: ApiEndpoints.LOGIN,
+            baseUrl: process.env.API_URL,
+            body: {
+                email: process.env.APP_EMAIL,
+                password: process.env.APP_PASSWORD,
+            },
+        });
 
-    expect(status).toBe(200);
-    expect(UserResponseSchema.parse(body)).toBeTruthy();
-});
+        expect(status).toBe(200);
+        expect(UserResponseSchema.parse(body)).toBeTruthy();
+    }
+);
 ```
 
 Use the `apiRequest` fixture directly for all API work -- assertions, `beforeEach`/`afterEach`, one-off calls. Do not create separate helpers for every endpoint.
@@ -1313,7 +1322,7 @@ npm run check:version
 | Rule             | Description                                           |
 | ---------------- | ----------------------------------------------------- |
 | Type annotations | Always specify types for parameters and return values |
-| Avoid `any`      | Use proper types or `unknown`                         |
+| No `any`         | Use proper types or `unknown`                         |
 | Strict mode      | Enabled in tsconfig.json                              |
 | ESNext features  | Optional chaining, nullish coalescing                 |
 
@@ -1346,7 +1355,7 @@ npm run check:version
 ### Page Object Guidelines
 
 1. **Locators as Getters** -- Use `get` accessors for all locators
-2. **Semantic Locators** -- Prefer `getByRole`, `getByLabel` over CSS/XPath
+2. **Semantic Locators** -- Use `getByRole`, `getByLabel` and the other semantic locators; never XPath or a CSS class or id selector
 3. **Three Locator Sections** -- Every page object should have: interactive element locators, feedback/validation message locators, and action methods
 4. **Action Methods** -- Methods should represent complete user flows
 5. **JSDoc on Actions Only** -- Add JSDoc with `@param` and `@returns` to action methods only. Never add JSDoc to locator getters.
@@ -1365,7 +1374,7 @@ npm run check:version
 
 ## Core Principles (The Constitution)
 
-The Constitution has one home, [`AGENTS.md`](AGENTS.md): 14 MUST, 5 SHOULD and 17 WON'T rules, one line each, with the skill that owns the detail named in the Skills Index. Every harness loads that file (Claude Code through `CLAUDE.md`), every hook message cites a rule by its name there, and `npm run check:skills-drift` proves each rule is anchored in its owning skill. This README does not repeat the rules, so they cannot drift here.
+The Constitution has one home, [`AGENTS.md`](AGENTS.md): 15 MUST, 4 SHOULD and 17 WON'T rules, one line each, with the skill that owns the detail named in the Skills Index. Every harness loads that file (Claude Code through `CLAUDE.md`), every hook message cites a rule by its name there, and `npm run check:skills-drift` proves each rule is anchored in its owning skill. This README does not repeat the rules, so they cannot drift here.
 
 What they amount to:
 

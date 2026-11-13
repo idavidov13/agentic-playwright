@@ -46,7 +46,7 @@ description: Use when the user names a branch with any review intent ("review PR
 
 ## References
 
-- `references/constitution-checklist.md`: step 6, the 30-row gate.
+- `references/constitution-checklist.md`: step 6, the 31-row gate.
 - `references/verification.md`: step 4, the tsc detour, running the affected specs, the env limit.
 - `references/reporting.md`: step 7, the confidence rubric and posting to GitHub.
 - `assets/report-template.md`: step 7, the report shape.

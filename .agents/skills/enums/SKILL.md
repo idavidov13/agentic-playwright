@@ -21,7 +21,7 @@ description: Use when adding or extending an enum under enums/** (endpoint path,
 - Any app-defined string used in more than one place (endpoint path, UI message, role, route, storage-state path) lives in an enum and is imported; `ApiEndpoints` members are the only source of endpoint paths.
 - App-specific enums in `enums/{area}/*.ts`, cross-app constants in `enums/util/*.ts`; extend an existing enum before creating a file, never a new top-level folder.
 - Every enum declaration carries a JSDoc line naming what it groups.
-- A UI message value is captured from the live app with `playwright-cli`, never guessed; app unreachable: add it with `// FIXME: unverified` and say so in the report.
+- A UI message value is captured from the live app with `playwright-cli`, never guessed; app unreachable: stop and tell the human.
 - Changing or renaming an existing member goes through `refactor-values` first.
 
 ## Procedure
