@@ -61,13 +61,29 @@ const BRAND_ART = String.raw`
     .slice(1, -1);
 const BRAND_SUBTITLE = 'Agentic Playwright Test Automation';
 
-/** Prints the ArchQA wordmark; cyan-to-blue fade on TTYs, plain elsewhere. */
+// One color per wordmark row: a light tint of the ArchQA sage green fading
+// down to the sage itself (#7cae7a). Same five colors as
+// assets/hero-terminal.svg; keep the two in step.
+const BRAND_FADE_RGB = [
+    [203, 223, 202],
+    [183, 211, 182],
+    [163, 198, 162],
+    [144, 186, 142],
+    [124, 174, 122],
+];
+// Nearest xterm-256 shade per row, for terminals without 24-bit color.
+const BRAND_FADE_256 = [194, 151, 151, 108, 108];
+
+/** Prints the ArchQA wordmark; sage-green fade on TTYs, plain elsewhere. */
 function printBrand() {
     const useColor = process.stdout.isTTY && !process.env.NO_COLOR;
-    const shades = [51, 45, 39, 33, 27];
+    const trueColor = /^(truecolor|24bit)$/i.test(process.env.COLORTERM ?? '');
     console.log('');
     BRAND_ART.forEach((line, i) => {
-        console.log(useColor ? `\x1b[38;5;${shades[i]}m${line}\x1b[0m` : line);
+        const sgr = trueColor
+            ? `38;2;${BRAND_FADE_RGB[i].join(';')}`
+            : `38;5;${BRAND_FADE_256[i]}`;
+        console.log(useColor ? `\x1b[${sgr}m${line}\x1b[0m` : line);
     });
     console.log(
         useColor
