@@ -166,8 +166,10 @@ copy_item '.claude/settings.local.json' opt    # per-user status line wiring
 #   npm ls        node_modules against package.json: a missing, invalid or
 #                 extraneous package. It never reads the lockfile.
 #   lock_matches  package-lock.json against node_modules/.package-lock.json,
-#                 npm's record of what it installed: a bump that stays inside
-#                 the package.json range.
+#                 npm's record of what it installed, in both directions: a bump
+#                 that stays inside the package.json range, and an installed
+#                 package the lockfile no longer lists (nested ones included,
+#                 which `npm ls --depth=0` never sees).
 # When either fails, reinstall from this worktree's own lockfile. Runs even when
 # node_modules was skipped as "exists", which is exactly the stale case.
 
@@ -186,6 +188,10 @@ lock_matches() {
             if (!have && want.optional) continue; // optional package for another platform
             if (!have || have.version !== want.version) process.exit(1);
         }
+        for (const name of Object.keys(installed)) {
+            // installed, but gone from the lockfile: `npm ci` would remove it
+            if (name.startsWith("node_modules/") && !lock[name]) process.exit(1);
+        }
     ' 2>/dev/null
 }
 
@@ -193,9 +199,16 @@ deps_ok() {
     (cd "$1" && npm ls --depth=0 >/dev/null 2>&1 && lock_matches)
 }
 
-if ! command -v npm >/dev/null 2>&1 || ! command -v node >/dev/null 2>&1; then
-    # Without npm every check below fails, which would read as a broken install.
-    printf '\n  skipped  dependency check: npm is not on PATH\n'
+# The check needs both tools: npm for `npm ls`, node for the lockfile comparison.
+tools_missing=""
+command -v npm >/dev/null 2>&1 || tools_missing="npm"
+command -v node >/dev/null 2>&1 || tools_missing="${tools_missing:+$tools_missing and }node"
+
+if [ -n "$tools_missing" ]; then
+    # Without them every check below fails, which would read as a broken install.
+    # Not a failure (a GUI-launched hook often has a bare PATH), but the summary
+    # repeats it so an unverified install is not mistaken for a verified one.
+    printf '\n  skipped  dependency check: %s not on PATH\n' "$tools_missing"
     printf '           verify by hand: (cd "%s" && npm ls --depth=0)\n' "$WT"
 else
     if [ -d "$ROOT/node_modules" ] && ! deps_ok "$ROOT"; then
@@ -232,6 +245,10 @@ fi
 # ------------------------------------------------------------------------ summary
 printf '\norca-setup: %d copied, %d skipped, %d missing, %d failed\n' \
     "$copied" "$skipped" "$missing" "$failed"
+
+if [ -n "$tools_missing" ]; then
+    printf 'orca-setup: dependencies NOT verified (%s not on PATH)\n' "$tools_missing" >&2
+fi
 
 if [ "$missing" -gt 0 ] || [ "$failed" -gt 0 ]; then
     printf 'orca-setup: worktree is INCOMPLETE\n' >&2
