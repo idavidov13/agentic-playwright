@@ -8,7 +8,7 @@ description: Use when writing or updating an API spec under tests/**/api/**, pla
 ## Critical
 
 - Never hardcode API URLs, access tokens, emails, passwords or endpoint paths: only `process.env.API_URL`, `process.env.ACCESS_TOKEN`, `process.env.APP_EMAIL` / `APP_PASSWORD` and `ApiEndpoints` from `enums/{area}/*`.
-- Schemas and tests come from the documented contract (OpenAPI / Swagger), never from a request made first; no document found: stop and ask.
+- Schemas and tests come from the documented contract (OpenAPI / Swagger), never from a request made first; none found: ask before live capture.
 - Assert every response body with `expect(SchemaName.parse(body)).toBeTruthy();`, not a generic or a bare parse; in fixture code, with no test to assert in, `const x = SchemaName.parse(body);`. Never `as`-cast.
 
     ```typescript

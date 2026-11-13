@@ -17,4 +17,4 @@ For a test that is red in CI and green locally. In CI the config runs one worker
     ENVIRONMENT=<name> CI=1 npx playwright test <file> --workers=1 --retries=0
     ```
 
-5. Still green: the cause is environment-driven (network, timing, state). Add temporary instrumentation (`console.log`, a screenshot, `--trace on`), push, read the new artifacts, then remove the instrumentation before merging.
+5. Still green: the cause is environment-driven (network, timing, state). Add temporary instrumentation (a screenshot, `--trace on`; not `console.log`, which `npm run lint` rejects), push, read the new artifacts, then remove the instrumentation before merging.

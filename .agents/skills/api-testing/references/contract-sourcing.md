@@ -24,4 +24,4 @@ The spec exists but omits a body shape or a status code:
 
 ## No documentation at all
 
-Make one real request per status code and capture field names, types, required versus optional, nullability, nested shapes and the error bodies. Treat the capture as the working contract, write the schema from it, and flag the missing documentation in the report: tests against "whatever the API does today" are a stopgap.
+Only once the human confirms none exists: make one real request per status code and capture field names, types, required versus optional, nullability, nested shapes and the error bodies. Treat the capture as the working contract, write the schema from it, and flag the missing documentation in the report: tests against "whatever the API does today" are a stopgap.

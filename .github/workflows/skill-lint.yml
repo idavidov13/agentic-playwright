@@ -1,7 +1,7 @@
 # Gates the orchestration layer: every PR (and push to main) touching the
 # rule trees, the Constitution, the gates, or a version surface must pass
-# the skill drift checks and the version-drift check. Pure bash + git, plus
-# one Node-free hash check of the vendored skills.
+# the skill drift checks and the version-drift check. Bash, git, the python3
+# standard library and the runner's node; no `npm install`.
 name: Skill Lint
 
 permissions:
