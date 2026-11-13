@@ -1473,7 +1473,7 @@ Running several agents in parallel means one git worktree per task. A new worktr
 sh "$ORCA_ROOT_PATH/.claude/orca/orca-worktree-setup.sh"
 ```
 
-Orca then runs it for every worktree it creates and passes `ORCA_ROOT_PATH` (the main checkout) and `ORCA_WORKTREE_PATH`. It reads the script from the main checkout, so the script has to exist on the branch checked out there. Nothing else in the project calls it: without Orca the file is inert. It also runs by hand from inside any worktree, where both paths are derived from git:
+Orca then runs it for every worktree it creates and passes `ORCA_ROOT_PATH` (the main checkout) and `ORCA_WORKTREE_PATH`. It reads the script from the main checkout, so the script has to exist on the branch checked out there. Nothing else in the project calls it: without Orca the file is inert. It also runs by hand from any directory inside a worktree, where both paths are derived from git:
 
 ```bash
 sh .claude/orca/orca-worktree-setup.sh --dry-run   # print what would be copied
@@ -1490,9 +1490,9 @@ sh .claude/orca/orca-worktree-setup.sh --force     # overwrite what is already t
 | `.auth`                       | optional | Saved storage states; the setup projects regenerate them                                     |
 | `.claude/settings.local.json` | optional | Per-user status line wiring                                                                  |
 
-An item already present in the worktree is skipped unless `--force` is passed. A required item missing from the main checkout, or any failed copy, ends the run with `worktree is INCOMPLETE` and exit code 1; a missing optional item is only noted. An unknown flag exits 2. Run from the main checkout itself, the script does nothing.
+An item already present in the worktree is skipped unless `--force` is passed. A required item missing from the main checkout, or any failed copy, ends the run with `worktree is INCOMPLETE` and exit code 1; a missing optional item is only noted. An unknown flag exits 2. Run from the main checkout itself, at any depth, the script does nothing. The script lives under `.claude/`, so a project scaffolded with `--no-claude` does not have it.
 
-After the copy it checks the dependencies with `npm ls --depth=0`. The copied `node_modules` is only as fresh as the main checkout's last install, so when the worktree is out of sync with its own lockfile (a dependency bump that was never installed in main, or a branch whose `package.json` differs) the script runs `npm ci --prefer-offline` there. It also warns when the main checkout itself is out of sync, with the command that fixes it at the source.
+After the copy it checks the dependencies twice: `npm ls --depth=0` compares `node_modules` with `package.json`, and a lockfile comparison sets `package-lock.json` against `node_modules/.package-lock.json`, npm's record of what it installed. The copied `node_modules` is only as fresh as the main checkout's last install, so when either check fails (a dependency bump that was never installed in main, or a branch whose `package.json` differs) the script runs `npm ci --prefer-offline` there and, when that fails, prints the last lines of its output. It also warns when the main checkout itself is out of sync, with the command that fixes it at the source. Without `npm` on `PATH` the check is skipped with a note and the copy still counts.
 
 `.playwright-cli/` is deliberately **not** copied. It holds the exploration session state and the `.last-explored` marker, and a copied marker would open the Explore Before Generate gate in a worktree where no exploration happened. Explore again in the worktree. Generated output (`test-results/`, `playwright-report/`, `blob-report/`) is not copied either.
 
