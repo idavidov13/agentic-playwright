@@ -22,6 +22,8 @@ npm run check:skills && npm run check:version
 npx playwright test        # requires env/.env.dev — see README "Environment Variables"
 ```
 
+Working in a git worktree? It starts without `env/.env.dev`, `node_modules` and the husky hooks. Seed it from the main checkout with `sh .claude/orca/orca-worktree-setup.sh` — see README "Git Worktrees (Orca)".
+
 ## Ground rules for changes
 
 - **Follow the Constitution.** The rules in `AGENTS.md` apply to contributed test code too: fixtures over manual instantiation, web-first assertions, no hard waits, no `any`, `z.strictObject()` for API schemas, one tag per test.

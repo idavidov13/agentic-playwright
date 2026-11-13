@@ -112,6 +112,7 @@ _Not affiliated with Microsoft. [Playwright](https://playwright.dev/) is an open
 - [Coding Standards](#coding-standards)
 - [Core Principles (The Constitution)](#core-principles-the-constitution)
 - [AI-Assisted Development Workflow](#ai-assisted-development-workflow)
+    - [Git Worktrees (Orca)](#git-worktrees-orca)
 - [AI Rules Architecture](#ai-rules-architecture)
 - [Architecture Overview](#architecture-overview)
 - [Troubleshooting](#troubleshooting)
@@ -497,6 +498,8 @@ root/
 │
 ├── .claude/                   # Claude Code configuration and the canonical skills
 │   ├── settings.json          # Hook wiring (PreToolUse: the Constitution hook)
+│   ├── orca/
+│   │   └── orca-worktree-setup.sh       # Orca setup hook: seeds a new git worktree with the gitignored files (env, node_modules, husky hooks)
 │   ├── scripts/
 │   │   ├── enforce_constitution.py      # PreToolUse hook: 18 mechanical rules; --scan mode for reviews, pre-commit and CI
 │   │   └── status_line.py               # Custom status line renderer (Gruvbox Dark theme)
@@ -1460,6 +1463,39 @@ git reset --hard HEAD~3
 
 This is why **committing after each verified change** is critical. Each commit is a safe checkpoint you can return to at any time.
 
+### Git Worktrees (Orca)
+
+Running several agents in parallel means one git worktree per task. A new worktree holds only the tracked files, so everything gitignored is missing: no `env/.env.dev` (tests navigate to `undefined`), no `node_modules` (nothing lints or runs) and no `.husky/_` (`core.hooksPath` points there, so a commit skips every pre-commit gate without saying so).
+
+`.claude/orca/orca-worktree-setup.sh` seeds a new worktree from the main checkout. It is written as an Orca setup hook. Wire it once, in Orca under **Settings → Repository Hooks → Setup Script**:
+
+```bash
+sh "$ORCA_ROOT_PATH/.claude/orca/orca-worktree-setup.sh"
+```
+
+Orca then runs it for every worktree it creates and passes `ORCA_ROOT_PATH` (the main checkout) and `ORCA_WORKTREE_PATH`. It reads the script from the main checkout, so the script has to exist on the branch checked out there. Nothing else in the project calls it: without Orca the file is inert. It also runs by hand from inside any worktree, where both paths are derived from git:
+
+```bash
+sh .claude/orca/orca-worktree-setup.sh --dry-run   # print what would be copied
+sh .claude/orca/orca-worktree-setup.sh             # copy what is missing
+sh .claude/orca/orca-worktree-setup.sh --force     # overwrite what is already there
+```
+
+| Item                          | Mode     | Why                                                                                          |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `env/.env.dev`                | required | URLs and credentials; `playwright.config.ts` loads it by default                             |
+| `node_modules`                | required | Copy-on-write clone on APFS (seconds, almost no extra disk), a plain copy elsewhere          |
+| every other `env/.env.*`      | optional | The environments `ENVIRONMENT=<name>` selects; `env/.env.example` is tracked, so it is there |
+| `.husky/_`                    | optional | The directory `core.hooksPath` points to; `npm ci` recreates it too                          |
+| `.auth`                       | optional | Saved storage states; the setup projects regenerate them                                     |
+| `.claude/settings.local.json` | optional | Per-user status line wiring                                                                  |
+
+An item already present in the worktree is skipped unless `--force` is passed. A required item missing from the main checkout, or any failed copy, ends the run with `worktree is INCOMPLETE` and exit code 1; a missing optional item is only noted. An unknown flag exits 2. Run from the main checkout itself, the script does nothing.
+
+After the copy it checks the dependencies with `npm ls --depth=0`. The copied `node_modules` is only as fresh as the main checkout's last install, so when the worktree is out of sync with its own lockfile (a dependency bump that was never installed in main, or a branch whose `package.json` differs) the script runs `npm ci --prefer-offline` there. It also warns when the main checkout itself is out of sync, with the command that fixes it at the source.
+
+`.playwright-cli/` is deliberately **not** copied. It holds the exploration session state and the `.last-explored` marker, and a copied marker would open the Explore Before Generate gate in a worktree where no exploration happened. Explore again in the worktree. Generated output (`test-results/`, `playwright-report/`, `blob-report/`) is not copied either.
+
 ---
 
 ## AI Rules Architecture
@@ -1549,6 +1585,16 @@ cp env/.env.example env/.env.dev
 ```
 
 Then edit it with your application's actual URLs and credentials.
+
+### A new git worktree cannot lint, run tests or run the pre-commit gates
+
+A worktree is created with the tracked files only: `env/.env.dev`, `node_modules` and `.husky/_` are gitignored and stay behind in the main checkout. Seed the worktree from it:
+
+```bash
+sh .claude/orca/orca-worktree-setup.sh
+```
+
+See [Git Worktrees (Orca)](#git-worktrees-orca) for what it copies and how to make Orca run it for every new worktree.
 
 ### `browserType.launch: Executable doesn't exist`
 
