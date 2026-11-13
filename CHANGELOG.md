@@ -4,6 +4,19 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ---
 
+## v2.0.2 -- ArchQA Colors, a Hero Image That Matches the Command -- 2026-11-13
+
+### Initializer
+
+- **The ArchQA wordmark prints in the brand's sage green** (`#7cae7a`), fading down from a light tint of it, instead of cyan to blue: the exact colors on a 24-bit terminal (`COLORTERM=truecolor` or `24bit`), the nearest 256-color shades elsewhere. Without a TTY or with `NO_COLOR` it stays plain.
+
+### Docs
+
+- **`assets/hero-terminal.svg` shows the documented command**, `npm create agentic-playwright@latest . -- --demo`, run inside `~/my-tests`, and what the initializer prints for it: the ArchQA wordmark in the same sage fade, the five setup steps, `3 passed`, the ready line and the two AI-rules lines, on the brand's dark slate with pale-yellow accents. The image ships in the template, so every project scaffolded from this version carries it in its README.
+- The package README shows the same image on npmjs.com.
+
+---
+
 ## v2.0.1 -- Two AI Flags, Clearer Commands -- 2026-11-03
 
 ### Initializer
