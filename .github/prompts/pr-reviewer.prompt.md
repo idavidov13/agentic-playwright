@@ -113,7 +113,7 @@ npx playwright test <changed spec path> --project <project-name>
 
 Check at minimum:
 
-- **MUST** for the area — API: `expect(Schema.parse(body)).toBeTruthy()` exactly; `z.strictObject()` not `z.object()`; 2+ API calls each in own `test.step()`; one tag/test; URLs/paths/messages from `config`/`enums`; state-mutating tests have cleanup hooks.
+- **MUST** for the area — API: `expect(Schema.parse(body)).toBeTruthy()` exactly; `z.strictObject()` not `z.object()`; 2+ API calls each in own `test.step()`; one tag/test; URLs and credentials from `process.env.*`, paths and messages from `enums`; state-mutating tests have cleanup hooks.
 - **WON'T** — no `any`, no XPath, no `waitForTimeout()`, no hardcoded secrets/content, no loose schemas, no tags on `describe`, no silent coverage drops.
 - **Contract fidelity (STRICT).** Schemas mirror the documented OpenAPI/Swagger contract. When live API disagrees with the contract, the API is the bug, NEVER the schema. Flag as 🔴 any schema-loosening (`z.strictObject`→`z.object`; added `.optional()`/`.nullable()`/`.passthrough()`/`.catchall()` or widened type to swallow a runtime value; deleted documented field; precise validator → looser) even if it makes a test pass. Sanctioned fix: `test.skip` + `// FIXME: <ticket>`.
 - **Sibling consistency** — divergence from the nearest file of the same kind is a finding.

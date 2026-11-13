@@ -13,6 +13,10 @@ description: Use when adding a reusable plain function under helpers/**, wiring 
 
     ```typescript
     // CORRECT
+    /**
+     * @param value - Epoch milliseconds or a date string.
+     * @returns The date formatted for en-US.
+     */
     export function formatDate(value: number | string): string {
         return new Date(value).toLocaleDateString('en-US');
     }

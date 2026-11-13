@@ -16,7 +16,7 @@ description: Use when choosing a locator for an element, writing or reviewing lo
     page.locator('.btn-primary');
     ```
 
-- Never XPath (`page.locator('//...')`, `'xpath=...'`). CSS class or id selectors only as a last resort after every semantic option is ruled out.
+- Never XPath (`page.locator('//...')`, `'xpath=...'`) and never a CSS class or id selector; when no semantic option fits, ask for a test id and use `getByTestId`.
 - Exploration with `playwright-cli` is mandatory before any selector is written. No guessing from wireframes, docs or screenshots. If the app cannot be reached or auth fails, stop and notify the human; never ship placeholder locators.
 - Strings inside `getByText(...)` come from `enums/{area}/*` (`Messages.LOGIN_ERROR`); the text is captured from the live app, never guessed (`enums`).
 - Every page object for a form or CRUD screen has feedback selectors: success, error, field validation, and toast, loading or empty state where the app shows them.
