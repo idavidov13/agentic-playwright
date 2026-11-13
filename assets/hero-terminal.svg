@@ -1,22 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="330" viewBox="0 0 720 330" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">
-  <!-- terminal window -->
-  <rect x="1" y="1" width="718" height="328" rx="12" fill="#0d1117" stroke="#30363d"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="524" viewBox="0 0 720 524" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">
+  <defs>
+    <!-- soft halo behind the wordmark; fills fade from a light tint of the ArchQA sage green down to the sage itself (#7cae7a) -->
+    <filter id="glow" x="-10%" y="-40%" width="120%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.35 0" result="halo"/>
+      <feMerge>
+        <feMergeNode in="halo"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <radialGradient id="spot" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#7cae7a" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#7cae7a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- terminal window: ArchQA dark slate (#4e4a59) chrome on a darker tint of the same hue -->
+  <rect x="1" y="1" width="718" height="522" rx="12" fill="#1c1b20" stroke="#4e4a59"/>
   <!-- title bar -->
-  <rect x="1" y="1" width="718" height="36" rx="12" fill="#161b22"/>
-  <rect x="1" y="25" width="718" height="12" fill="#161b22"/>
+  <rect x="1" y="1" width="718" height="36" rx="12" fill="#4e4a59"/>
+  <rect x="1" y="25" width="718" height="12" fill="#4e4a59"/>
   <circle cx="24" cy="19" r="6" fill="#ff5f57"/>
   <circle cx="44" cy="19" r="6" fill="#febc2e"/>
   <circle cx="64" cy="19" r="6" fill="#28c840"/>
-  <text x="360" y="24" text-anchor="middle" fill="#8b949e" font-size="12">terminal</text>
+  <text x="360" y="24" text-anchor="middle" fill="#d9d6e0" font-size="12">~/my-tests</text>
   <!-- content (leading/inner runs of spaces are non-breaking so no renderer collapses them) -->
-  <text x="24" y="66" fill="#8b949e">$&#160;<tspan fill="#e6edf3">npm&#160;create&#160;agentic-playwright&#160;my-tests&#160;--&#160;--demo</tspan></text>
-  <text x="24" y="98" fill="#00ffff">&#160;&#160;&#160;&#160;&#160;_&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_&#160;&#160;&#160;&#160;&#160;&#160;___&#160;&#160;&#160;&#160;&#160;&#160;_</text>
-  <text x="24" y="118" fill="#00d7ff">&#160;&#160;&#160;&#160;/&#160;\&#160;&#160;&#160;_&#160;__&#160;___|&#160;|__&#160;&#160;/&#160;_&#160;\&#160;&#160;&#160;&#160;/&#160;\</text>
-  <text x="24" y="138" fill="#00afff">&#160;&#160;&#160;/&#160;_&#160;\&#160;|&#160;'__/&#160;__|&#160;'_&#160;\|&#160;|&#160;|&#160;|&#160;&#160;/&#160;_&#160;\</text>
-  <text x="24" y="158" fill="#0087ff">&#160;&#160;/&#160;___&#160;\|&#160;|&#160;|&#160;(__|&#160;|&#160;|&#160;|&#160;|_|&#160;|&#160;/&#160;___&#160;\</text>
-  <text x="24" y="178" fill="#005fff">&#160;/_/&#160;&#160;&#160;\_\_|&#160;&#160;\___|_|&#160;|_|\__\_\/_/&#160;&#160;&#160;\_\</text>
-  <text x="24" y="210" fill="#e6edf3" font-weight="bold">&#160;&#160;Agentic&#160;Playwright&#160;Test&#160;Automation</text>
-  <text x="24" y="242" fill="#e6edf3">▶&#160;Running&#160;the&#160;@smoke&#160;verification&#160;test</text>
-  <text x="24" y="266" fill="#3fb950">&#160;&#160;3&#160;passed&#160;(6.0s)</text>
-  <text x="24" y="298" fill="#3fb950">✅&#160;my-tests&#160;is&#160;ready&#160;—&#160;the&#160;smoke&#160;test&#160;just&#160;passed.</text>
+  <text x="24" y="68" fill="#fff9a5">~/my-tests&#160;<tspan fill="#fff9a5">❯</tspan>&#160;<tspan fill="#f1eff5">npm&#160;create&#160;agentic-playwright@latest&#160;.</tspan>&#160;<tspan fill="#a29eae">--</tspan>&#160;<tspan fill="#fff9a5">--demo</tspan></text>
+  <ellipse cx="196" cy="136" rx="250" ry="76" fill="url(#spot)"/>
+  <g filter="url(#glow)">
+    <text x="24" y="100" fill="#cbdfca">&#160;&#160;&#160;&#160;&#160;_&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_&#160;&#160;&#160;&#160;&#160;&#160;___&#160;&#160;&#160;&#160;&#160;&#160;_</text>
+    <text x="24" y="120" fill="#b7d3b6">&#160;&#160;&#160;&#160;/&#160;\&#160;&#160;&#160;_&#160;__&#160;___|&#160;|__&#160;&#160;/&#160;_&#160;\&#160;&#160;&#160;&#160;/&#160;\</text>
+    <text x="24" y="140" fill="#a3c6a2">&#160;&#160;&#160;/&#160;_&#160;\&#160;|&#160;'__/&#160;__|&#160;'_&#160;\|&#160;|&#160;|&#160;|&#160;&#160;/&#160;_&#160;\</text>
+    <text x="24" y="160" fill="#90ba8e">&#160;&#160;/&#160;___&#160;\|&#160;|&#160;|&#160;(__|&#160;|&#160;|&#160;|&#160;|_|&#160;|&#160;/&#160;___&#160;\</text>
+    <text x="24" y="180" fill="#7cae7a">&#160;/_/&#160;&#160;&#160;\_\_|&#160;&#160;\___|_|&#160;|_|\__\_\/_/&#160;&#160;&#160;\_\</text>
+  </g>
+  <text x="24" y="212" fill="#f1eff5" font-weight="bold">&#160;&#160;Agentic&#160;Playwright&#160;Test&#160;Automation</text>
+  <!-- the initializer's own step lines, in order -->
+  <text x="24" y="244" fill="#f1eff5"><tspan fill="#fff9a5">▶</tspan>&#160;Creating&#160;my-tests&#160;<tspan fill="#a29eae">in&#160;~/my-tests</tspan></text>
+  <text x="24" y="266" fill="#f1eff5"><tspan fill="#fff9a5">▶</tspan>&#160;Initializing&#160;git&#160;repository</text>
+  <text x="24" y="288" fill="#f1eff5"><tspan fill="#fff9a5">▶</tspan>&#160;Installing&#160;dependencies&#160;<tspan fill="#a29eae">(npm&#160;install)</tspan></text>
+  <text x="24" y="310" fill="#f1eff5"><tspan fill="#fff9a5">▶</tspan>&#160;Installing&#160;Playwright&#160;browser&#160;<tspan fill="#a29eae">(chromium)</tspan></text>
+  <text x="24" y="332" fill="#f1eff5"><tspan fill="#fff9a5">▶</tspan>&#160;Running&#160;the&#160;<tspan fill="#fff9a5">@smoke</tspan>&#160;verification&#160;test</text>
+  <text x="24" y="354" fill="#7cae7a">&#160;&#160;3&#160;passed&#160;(6.0s)</text>
+  <line x1="24" y1="372" x2="696" y2="372" stroke="#4e4a59"/>
+  <text x="24" y="400" fill="#7cae7a" font-weight="bold">✅&#160;my-tests&#160;is&#160;ready&#160;—&#160;the&#160;smoke&#160;test&#160;just&#160;passed.</text>
+  <text x="24" y="430" fill="#f1eff5">AI&#160;assistants&#160;pick&#160;up&#160;their&#160;rules&#160;automatically:</text>
+  <text x="24" y="452" fill="#a29eae">&#160;&#160;<tspan fill="#f1eff5">Claude&#160;Code</tspan>&#160;—&#160;CLAUDE.md&#160;(imports&#160;AGENTS.md)&#160;+&#160;.claude/skills/</text>
+  <text x="24" y="474" fill="#a29eae">&#160;&#160;<tspan fill="#f1eff5">Codex,&#160;Cursor,&#160;GitHub&#160;Copilot,&#160;...</tspan>&#160;—&#160;AGENTS.md&#160;+&#160;.agents/skills/</text>
+  <text x="24" y="504" fill="#fff9a5">~/my-tests&#160;<tspan fill="#fff9a5">❯</tspan>&#160;<tspan fill="#f1eff5">▍</tspan></text>
 </svg>

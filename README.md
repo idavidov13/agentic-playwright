@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/hero-terminal.svg" width="720" alt="npm create agentic-playwright — ArchQA banner, smoke test green">
+  <img src="assets/hero-terminal.svg" width="720" alt="npm create agentic-playwright@latest . -- --demo: ArchQA banner, the five setup steps, smoke test green, AI rules loaded">
 </p>
 
 <h1 align="center">Agentic Playwright</h1>

@@ -1,5 +1,9 @@
 # create-agentic-playwright
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/idavidov13/agentic-playwright/main/assets/hero-terminal.svg" width="720" alt="npm create agentic-playwright@latest . -- --demo: ArchQA banner, the five setup steps, smoke test green, AI rules loaded">
+</p>
+
 > **Stop teaching your AI how to write tests. Hand it the rulebook.**
 
 Scaffold a production-grade Playwright + TypeScript test framework with a harness for
