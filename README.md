@@ -968,7 +968,16 @@ Use semantic locators in this order of preference:
 4. `page.getByText()` -- Text content
 5. `page.getByTestId()` -- Test IDs (fallback)
 
-XPath and CSS class or id selectors are not allowed. When no semantic option fits, ask for a test id.
+XPath is not allowed. When no semantic option fits, ask for a test id.
+
+A CSS locator is an exception, not a sixth tier. It ships only when the app cannot take a test id (a third-party widget, markup you cannot change), and the line above it says why:
+
+```typescript
+// eslint-disable-next-line playwright/no-raw-locators -- vendor grid: no role, name or test id
+page.getByRole('region', { name: 'Orders' }).locator('[data-row-id]');
+```
+
+`npm run lint` fails a raw `locator()` without that line.
 
 ### Registering Page Objects
 
@@ -1355,7 +1364,7 @@ npm run check:version
 ### Page Object Guidelines
 
 1. **Locators as Getters** -- Use `get` accessors for all locators
-2. **Semantic Locators** -- Use `getByRole`, `getByLabel` and the other semantic locators; never XPath or a CSS class or id selector
+2. **Semantic Locators** -- Use `getByRole`, `getByLabel` and the other semantic locators; never XPath, and a CSS locator only as the documented exception ([Locator Priority](#locator-priority))
 3. **Three Locator Sections** -- Every page object should have: interactive element locators, feedback/validation message locators, and action methods
 4. **Action Methods** -- Methods should represent complete user flows
 5. **JSDoc on Actions Only** -- Add JSDoc with `@param` and `@returns` to action methods only. Never add JSDoc to locator getters.
