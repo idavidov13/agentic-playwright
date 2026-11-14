@@ -6,8 +6,6 @@ name: Release
 # repository idavidov13/agentic-playwright, workflow release.yml.
 #
 # Release procedure:
-#   Review the Quarantine report Job Summary and resolve or explicitly accept
-#   expired quarantines in their tracking issues before releasing.
 #   1. Ensure VERSION, package.json (root), CHANGELOG.md, and
 #      packages/create-agentic-playwright/package.json all carry the version.
 #   2. git tag vX.Y.Z && git push origin vX.Y.Z
