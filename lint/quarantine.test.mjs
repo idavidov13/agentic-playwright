@@ -8,6 +8,8 @@ tester.run('quarantine', rule, {
     valid: [
         `test.fixme('flaky', ${annotation}, () => {});`,
         `test.describe.fixme('group', ${annotation}, () => {});`,
+        `test.describe.parallel.skip('group', ${annotation}, () => {});`,
+        `test.describe.serial.fixme('group', ${annotation}, () => {});`,
         `test.skip('flaky', ${annotation}, () => {});`,
         "// FIXME: https://example.com/issue/1\ntest.skip('contract', () => {});",
         'other.fixme(true);',
@@ -16,6 +18,8 @@ tester.run('quarantine', rule, {
         "test.fixme('missing', () => {});",
         "test.fixme(true, 'reason');",
         "test.skip('missing', () => {});",
+        "test.describe.parallel.skip('missing', () => {});",
+        "test.describe.serial.fixme('missing', () => {});",
         "// FIXME: later\ntest.skip('missing', () => {});",
         `test.fixme('bad date', ${annotation.replace('2028-02-29', '2027-02-29')}, () => {});`,
         `test.fixme('missing owner', ${annotation.replace('owner=@alice; ', '')}, () => {});`,

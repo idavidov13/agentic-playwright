@@ -40,7 +40,13 @@ const method = (callee) => {
         !['fixme', 'skip'].includes(callee.property.name)
     )
         return;
-    const object = callee.object;
+    let object = callee.object;
+    if (
+        object.type === 'MemberExpression' &&
+        !object.computed &&
+        ['parallel', 'serial'].includes(object.property.name)
+    )
+        object = object.object;
     if (object.type === 'Identifier' && object.name === 'test')
         return callee.property.name;
     if (

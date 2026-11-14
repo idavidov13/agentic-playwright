@@ -1727,4 +1727,4 @@ This project is licensed under the MIT License -- see the [LICENSE](LICENSE) fil
 
 ### Quarantining a flaky test
 
-Investigate the flake first. If it cannot be fixed now, ask a human to approve the owner and expiry, then use declaration-form `test.fixme` with a `quarantine` annotation. See the [quarantine procedure](.claude/skills/debugging/references/quarantine.md). ESLint validates the annotation. Expiry is not automatically checked.
+Investigate the flake first. If it cannot be fixed now, ask a human to approve the owner and expiry, then use declaration-form `test.fixme` with a `quarantine` annotation. See the quarantine procedure for [Claude Code](.claude/skills/debugging/references/quarantine.md) or [other agents](.agents/skills/debugging/references/quarantine.md), depending on which skill tree is installed. ESLint validates the annotation. Expiry is not automatically checked.
