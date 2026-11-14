@@ -8,8 +8,8 @@ Walk it after every generated or modified artifact, once `npm run lint` and `npx
 - [ ] A test that mutates shared state is tagged only `@destructive`; every state-mutating test, shared or own-data, reverts in `afterEach` or `afterAll`.
 - [ ] Locator getters carry no JSDoc; action methods carry `@param` and `@returns`.
 - [ ] A page object for a form or CRUD page has success, error and validation-message locators.
-- [ ] API: every documented status code has a test, passing or `test.skip` + `// FIXME`; no schema was loosened to make a test pass.
-- [ ] API: every body field has a per-field omission test and an invalid-type `for...of` loop over the universal arrays.
-- [ ] API: path parameters have the invalid-format loop; secured endpoints have 401 and 403 tests; every endpoint has one 405 test.
+- [ ] API: every documented status code has a test, passing or `test.skip` + `// FIXME`, or a `// SCOPE` line naming who cut it; no schema was loosened to make a test pass.
+- [ ] API: every body field has a per-field omission test and an invalid-type `for...of` loop over the universal arrays, or the request-body rows carry `// SCOPE` lines.
+- [ ] API: path parameters have the invalid-format loop; secured endpoints have missing-auth and wrong-role tests; every endpoint has one unsupported-method test; a row left out has its `// SCOPE` line.
 - [ ] No explore-only or throwaway file is left in the tree.
 - [ ] The affected tests ran green (`npx playwright test <file>`).
