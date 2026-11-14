@@ -36,6 +36,7 @@ jobs:
 
             - run: npm ci --prefer-offline
             - run: node lint/quarantine.test.mjs
+            - run: node lint/quarantine-report.test.mjs
 
             - name: ESLint and Constitution scan over changed TypeScript (whole project when the rules changed)
               run: |

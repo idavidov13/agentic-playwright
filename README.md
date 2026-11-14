@@ -1326,6 +1326,8 @@ Malformed payloads and non-target files always pass -- the hook never blocks on 
 
 ### Versioning
 
+Before releasing, the release owner runs the **Quarantine report** workflow (or opens its latest run) and reviews its Job Summary. For each expired quarantine, coordinate a fix or explicitly record acceptance and a new owner-approved deadline in its tracking issue before deciding whether to release.
+
 The root `VERSION` file is the single source of truth. To cut a release:
 
 ```bash
