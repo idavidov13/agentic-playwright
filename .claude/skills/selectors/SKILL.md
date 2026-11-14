@@ -16,7 +16,14 @@ description: Use when choosing a locator for an element, writing or reviewing lo
     page.locator('.btn-primary');
     ```
 
-- Never XPath (`page.locator('//...')`, `'xpath=...'`). CSS class or id selectors only as a last resort after every semantic option is ruled out.
+- Never XPath (`page.locator('//...')`, `'xpath=...'`). When no semantic option fits, ask for a test id and use `getByTestId`.
+- A CSS locator is an exception, not a tier: it ships only after the human confirms the app cannot take a test id, with the reason on the line (`references/locator-choice.md`).
+
+    ```typescript
+    // eslint-disable-next-line playwright/no-raw-locators -- vendor grid: no role, name or test id
+    page.getByRole('region', { name: 'Orders' }).locator('[data-row-id]');
+    ```
+
 - Exploration with `playwright-cli` is mandatory before any selector is written. No guessing from wireframes, docs or screenshots. If the app cannot be reached or auth fails, stop and notify the human; never ship placeholder locators.
 - Strings inside `getByText(...)` come from `enums/{area}/*` (`Messages.LOGIN_ERROR`); the text is captured from the live app, never guessed (`enums`).
 - Every page object for a form or CRUD screen has feedback selectors: success, error, field validation, and toast, loading or empty state where the app shows them.
@@ -32,5 +39,5 @@ description: Use when choosing a locator for an element, writing or reviewing lo
 ## References
 
 - `references/exploration-workflow.md`: what to observe at each state and the stop-and-notify protocol when the app is unreachable.
-- `references/locator-choice.md`: correct form per tier, exact and scoped matches, multi-match and "stale" symptoms, elements with no accessible name.
+- `references/locator-choice.md`: correct form per tier, exact and scoped matches, the CSS exception, multi-match and "stale" symptoms, elements with no accessible name.
 - `references/feedback-selectors.md`: the feedback types to capture and the locator for each.
