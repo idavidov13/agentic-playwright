@@ -23,6 +23,8 @@
   plus the AI rules your assistant picks up automatically, from the very first prompt.
 </p>
 
+> **What it guarantees, and what it does not.** The rules, the hook and the gates guarantee the form of a test: structure, selectors, schemas, data, tags. They do not guarantee its value. Which scenarios matter, and whether a test would catch a real bug, is decided in human review before the commit.
+
 ## See it
 
 From the (empty) directory your project should live in — the `.` means "scaffold right
@@ -412,7 +414,16 @@ Edit `helpers/app/createStorageState.ts` to match your app's actual login flow. 
 - `createAppStorageState()` -- Browser-based login for storage state
 - `setUserAccessToken()` -- API-based login for access tokens
 
-### Step 5: Write Your First Real Test
+### Step 5: Match Your API's Error Conventions
+
+The API coverage matrix and the shared error schemas describe the demo API: 422 for a validation error, `{ error }` as the 401 body. Your API may answer differently (400 instead of 422, another error body). Change both once:
+
+- `fixtures/api/schemas/util/errorResponseSchema.ts`: your API's error shapes.
+- The Status column in `.claude/skills/api-testing/references/coverage-matrix.md`, then `npm run skills:sync`. Keep the Scenario column: the scenarios are the rule, the codes are a convention.
+
+Until you do, the agent still takes each expected status from your API contract, and captures live (flagged in its plan) what the contract leaves out.
+
+### Step 6: Write Your First Real Test
 
 Replace the example tests in `tests/app/functional/` with tests for your application. Follow the pattern in the example files:
 
@@ -438,7 +449,7 @@ test.describe('Your Feature', () => {
 });
 ```
 
-### Step 6: Run and Verify
+### Step 7: Run and Verify
 
 ```bash
 npm test
@@ -972,6 +983,8 @@ Use semantic locators in this order of preference:
 5. `page.getByTestId()` -- Test IDs (fallback)
 
 XPath and CSS class or id selectors are not allowed. When no semantic option fits, ask for a test id.
+
+UI copy lives in the `Messages` enums under `enums/{area}/` and specs assert on page-object getters, so a wording change is one enum edit, not a spec edit.
 
 ### Registering Page Objects
 
