@@ -1326,8 +1326,6 @@ Malformed payloads and non-target files always pass -- the hook never blocks on 
 
 ### Versioning
 
-Before releasing, the release owner runs the **Quarantine report** workflow (or opens its latest run) and reviews its Job Summary. For each expired quarantine, coordinate a fix or explicitly record acceptance and a new owner-approved deadline in its tracking issue before deciding whether to release.
-
 The root `VERSION` file is the single source of truth. To cut a release:
 
 ```bash
@@ -1729,4 +1727,4 @@ This project is licensed under the MIT License -- see the [LICENSE](LICENSE) fil
 
 ### Quarantining a flaky test
 
-Investigate the flake first. If it cannot be fixed now, ask a human to approve the owner and expiry, then use declaration-form `test.fixme` with a `quarantine` annotation. See the [quarantine procedure](.claude/skills/debugging/references/quarantine.md). ESLint validates the annotation. The scheduled Quarantine report lists expired quarantines in its GitHub Actions job summary; run `node lint/quarantine-report.mjs` locally.
+Investigate the flake first. If it cannot be fixed now, ask a human to approve the owner and expiry, then use declaration-form `test.fixme` with a `quarantine` annotation. See the [quarantine procedure](.claude/skills/debugging/references/quarantine.md). ESLint validates the annotation. Expiry is not automatically checked.

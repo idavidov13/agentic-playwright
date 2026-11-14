@@ -17,4 +17,4 @@ test.fixme(
 );
 ```
 
-ESLint validates the owner and calendar date. The scheduled Quarantine report lists expired quarantines in the GitHub Actions job summary; run `node lint/quarantine-report.mjs` locally. Contract mismatches remain `test.skip` with `// FIXME: <ticket-url>`.
+ESLint validates the owner and calendar date. Expiry is not automatically checked. Contract mismatches remain `test.skip` with `// FIXME: <ticket-url>`.

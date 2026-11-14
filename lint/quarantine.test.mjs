@@ -21,24 +21,3 @@ tester.run('quarantine', rule, {
         `test.fixme('missing owner', ${annotation.replace('owner=@alice; ', '')}, () => {});`,
     ].map((code) => ({ code, errors: [{ messageId: 'quarantine' }] })),
 });
-
-const { expiry } = await import('./quarantine.mjs');
-tester.run('expiry', expiry, {
-    valid: [
-        {
-            code: `test.fixme('t', ${annotation}, () => {});`,
-            options: [{ today: '2028-02-29' }],
-        },
-        {
-            code: `test.fixme('t', ${annotation}, () => {});`,
-            options: [{ today: '2028-02-28' }],
-        },
-    ],
-    invalid: [
-        {
-            code: `test.fixme('t', ${annotation}, () => {});`,
-            options: [{ today: '2028-03-01' }],
-            errors: [{ messageId: 'expired' }],
-        },
-    ],
-});
