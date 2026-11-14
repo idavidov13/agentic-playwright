@@ -89,6 +89,14 @@ copy_item() {
     src="$ROOT/$rel"
     dst="$WT/$rel"
 
+    # A path git tracks is already checked out at this branch's version: never
+    # replace it with the main checkout's copy, --force included.
+    if git -C "$WT" ls-files --error-unmatch -- "$rel" >/dev/null 2>&1; then
+        printf '  tracked  %s  (checked out by git, left as is)\n' "$rel"
+        skipped=$((skipped + 1))
+        return 0
+    fi
+
     if [ ! -e "$src" ]; then
         if [ "$mode" = "req" ]; then
             printf '  MISSING  %s  (required, not in main checkout)\n' "$rel"
@@ -145,7 +153,7 @@ copy_item '.husky/_'                    opt    # core.hooksPath=.husky/_ is rela
                                                # gitignored, so without it the worktree commits with
                                                # NO pre-commit gates. `npm ci` recreates it too.
 copy_item '.auth'                       opt    # saved storage states; the setup project regenerates them
-copy_item '.claude/settings.local.json' opt    # per-user status line wiring
+copy_item '.claude/settings.local.json' opt    # per-user status line wiring; left as is where git tracks it
 
 # Tracked, so git already checked them out (nothing to copy):
 #   CLAUDE.md AGENTS.md .claude/ .agents/ .playwright/cli.config.json
@@ -217,10 +225,14 @@ else
     fi
 
     if [ "$DRY" = "1" ]; then
-        if deps_ok "$WT"; then
+        if [ ! -d "$WT/node_modules" ] || [ "$FORCE" = "1" ]; then
+            # The real run copies node_modules first, so there is nothing to
+            # check yet: a verdict on what is there now would mislead.
+            printf '  would    check node_modules after the copy (npm ci --prefer-offline only when out of sync)\n'
+        elif deps_ok "$WT"; then
             printf '  in sync  node_modules\n'
         else
-            printf '  would    npm ci --prefer-offline  (node_modules absent or out of sync)\n'
+            printf '  would    npm ci --prefer-offline  (node_modules out of sync)\n'
         fi
     elif ! deps_ok "$WT"; then
         printf '\n  syncing  node_modules (npm ci --prefer-offline)\n'
