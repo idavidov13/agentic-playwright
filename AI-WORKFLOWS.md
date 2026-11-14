@@ -332,3 +332,5 @@ The rules most often skipped under time pressure — and the one that catches ea
 ---
 
 _This playbook mirrors the scaffold's skills (`.claude/skills/**`, generated into `.agents/skills/`). The skills own the deep rules and examples; this file is the orchestration map that keeps every task on the same path._
+
+For an unresolved flake, follow `debugging`: investigate first, then propose a declaration-form quarantine with a human-approved owner and expiry.

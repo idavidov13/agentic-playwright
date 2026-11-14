@@ -54,3 +54,5 @@ Reproduce this table in your working notes (not necessarily in the final report)
 ## Output of this gate
 
 A filled table. Carry every ❌ into the report at its tier, and let the count of unresolved ❌ inform the confidence score and verdict. If you couldn't evaluate an item (e.g. tests unrunnable for env), say so explicitly rather than marking it ✅.
+
+- Flag a quarantine without human approval, a named owner, expiry and investigation evidence.

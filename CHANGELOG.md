@@ -4,6 +4,10 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ---
 
+## Unreleased
+
+- Require owner and expiry annotations for quarantined tests and document human approval.
+
 ## v2.0.4 -- A Human-Set Test Scope, Worktree Setup for Orca -- 2026-11-14
 
 ### Rules layer

@@ -156,3 +156,5 @@ Only if Phase 8 changed files and re-verification passes. Never commit without e
 - Runtime ≠ contract: report mismatches via `test.skip` + `// FIXME`, never relax the schema.
 - Env failures aren't branch failures.
 - A comment/test-name vs code gap is itself a finding.
+
+- Flag quarantine without human approval, a named owner, expiry and investigation evidence.

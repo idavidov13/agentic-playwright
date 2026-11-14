@@ -1724,3 +1724,7 @@ The free scaffold tells your AI what good tests look like. **Agentic Playwright 
 ## License
 
 This project is licensed under the MIT License -- see the [LICENSE](LICENSE) file for details.
+
+### Quarantining a flaky test
+
+Investigate the flake first. If it cannot be fixed now, ask a human to approve the owner and expiry, then use declaration-form `test.fixme` with a `quarantine` annotation. See the [quarantine procedure](.claude/skills/debugging/references/quarantine.md). ESLint validates the annotation. The scheduled Quarantine report lists expired quarantines in its GitHub Actions job summary; run `node lint/quarantine-report.mjs` locally.

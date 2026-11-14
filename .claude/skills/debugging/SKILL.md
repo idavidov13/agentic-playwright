@@ -8,7 +8,7 @@ description: Use when a Playwright test fails, flakes or times out, when `Schema
 ## Critical
 
 - **Read the failure message before touching code.** It names the test, the failed call with expected versus received, and the source line.
-- **Never suppress a failure.** No `test.skip` without `// FIXME: <ticket-url>`, no loosened assertion or schema, no timeout bump, no `try/catch` around `expect`. A response that disagrees with the documented contract follows the `api-testing` protocol.
+- **Never suppress a failure.** No `test.skip` without `// FIXME: <ticket-url>` or an approved quarantine, no loosened assertion or schema, no timeout bump, no `try/catch` around `expect`. A response that disagrees with the documented contract follows the `api-testing` protocol.
 - **Never add `page.waitForTimeout(...)` to fix timing.** Use a web-first assertion or `page.waitForResponse(...)` in the page-object action.
 - **Never ship a fix you could not reproduce.** Reproduce locally or replay the CI artifacts first.
 - **Traces exist only after a retry.** `trace: 'on-first-retry'` with `retries: 0` locally means no trace by default; run with `--trace on` or use UI Mode.
@@ -39,6 +39,8 @@ description: Use when a Playwright test fails, flakes or times out, when `Schema
 6. Re-run the file (5× for a flake), then `npm run lint`; remove any `test.only` and instrumentation before committing.
 
 ## References
+
+- `references/quarantine.md`: for unresolved flakes.
 
 - `references/tools.md`: step 4, which tool for which failure and the commands.
 - `references/ci-replay.md`: step 3, when CI is red and local is green.

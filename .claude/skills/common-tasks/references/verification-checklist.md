@@ -13,3 +13,5 @@ Walk it after every generated or modified artifact, once `npm run lint` and `npx
 - [ ] API: path parameters have the invalid-format loop; secured endpoints have missing-auth and wrong-role tests; every endpoint has one unsupported-method test; a row left out has its `// SCOPE` line.
 - [ ] No explore-only or throwaway file is left in the tree.
 - [ ] The affected tests ran green (`npx playwright test <file>`).
+
+- [ ] Quarantines have human approval, an owner, expiry and investigation evidence.

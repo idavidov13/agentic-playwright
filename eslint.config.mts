@@ -2,6 +2,7 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import prettierPlugin from 'eslint-plugin-prettier';
 import playwright from 'eslint-plugin-playwright';
+import quarantine from './lint/quarantine.mjs';
 
 /**
  * Prettier configuration for consistent code formatting.
@@ -115,6 +116,11 @@ const config = [
             'playwright/no-focused-test': 'error', // No test.only in commits
             'playwright/no-standalone-expect': 'error', // Expect must be in test
         },
+    },
+    {
+        files: ['tests/**/*.ts', 'tests/**/*.tsx'],
+        plugins: { quarantine: { rules: { annotation: quarantine } } },
+        rules: { 'quarantine/annotation': 'error' },
     },
 ];
 

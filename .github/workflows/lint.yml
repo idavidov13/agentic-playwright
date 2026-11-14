@@ -35,6 +35,7 @@ jobs:
                   cache: npm
 
             - run: npm ci --prefer-offline
+            - run: node lint/quarantine.test.mjs
 
             - name: ESLint and Constitution scan over changed TypeScript (whole project when the rules changed)
               run: |
@@ -59,7 +60,7 @@ jobs:
                   fi
                   rules_changed=""
                   if [ -n "$base" ]; then
-                      rules_changed=$(git diff --name-only "$base"...HEAD -- eslint.config.mts tsconfig.json package-lock.json .claude/scripts/enforce_constitution.py)
+                      rules_changed=$(git diff --name-only "$base"...HEAD -- eslint.config.mts lint/ tsconfig.json package-lock.json .claude/scripts/enforce_constitution.py)
                   fi
                   if [ -z "$base" ] || [ -n "$rules_changed" ]; then
                       [ -z "$base" ] && echo "No base ref — linting the whole project." \

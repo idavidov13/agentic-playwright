@@ -54,7 +54,7 @@ Rules for every agent in this repository. Skills hold the detail; load the one t
 ## Workflow
 
 - **Proceed**: load `ai-native-workflow` first on every non-trivial task; it routes, explores and stops at a confidence-scored proposal before any edit. One-line fix, typo or single import: direct mode, verify the premise, apply, report.
-- **Verify**: `npm run lint`, then `npx playwright test <affected files>`; red means `debugging`, never a skipped or loosened test.
+- **Verify**: `npm run lint`, then `npx playwright test <affected files>`; red means `debugging`; quarantine needs human approval, owner and expiry.
 - **Commit**: ask first; one verified task per commit, Conventional Commit subject; never `test.only` or a real env file.
 
 ## Skills Index
