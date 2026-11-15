@@ -33,30 +33,28 @@ const annotated = (details) => {
         ? annotation.elements.some(valid)
         : valid(annotation);
 };
+const memberName = (node) =>
+    node?.type === 'MemberExpression'
+        ? node.computed
+            ? string(node.property)
+            : node.property.name
+        : undefined;
 const method = (callee) => {
-    if (
-        callee?.type !== 'MemberExpression' ||
-        callee.computed ||
-        !['fixme', 'skip'].includes(callee.property.name)
-    )
-        return;
+    const kind = memberName(callee);
+    if (!['fixme', 'skip'].includes(kind)) return;
     let object = callee.object;
-    if (
-        object.type === 'MemberExpression' &&
-        !object.computed &&
-        ['parallel', 'serial'].includes(object.property.name)
-    )
+    if (['parallel', 'serial'].includes(memberName(object)))
         object = object.object;
     if (object.type === 'Identifier' && object.name === 'test')
-        return callee.property.name;
+        return { kind, group: false };
     if (
-        object.type === 'MemberExpression' &&
-        !object.computed &&
-        object.object.name === 'test' &&
-        object.property.name === 'describe'
+        memberName(object) === 'describe' &&
+        object.object.type === 'Identifier' &&
+        object.object.name === 'test'
     )
-        return callee.property.name;
+        return { kind, group: true };
 };
+
 export default {
     meta: {
         type: 'problem',
@@ -69,13 +67,14 @@ export default {
     create(context) {
         return {
             CallExpression(node) {
-                const kind = method(node.callee);
-                if (!kind) return;
+                const target = method(node.callee);
+                if (!target) return;
                 const [title, details] = node.arguments;
                 if (string(title) !== undefined && annotated(details)) return;
                 const body = node.arguments.at(-1);
                 if (
-                    kind === 'skip' &&
+                    target.kind === 'skip' &&
+                    !target.group &&
                     string(title) !== undefined &&
                     ['ArrowFunctionExpression', 'FunctionExpression'].includes(
                         body?.type
