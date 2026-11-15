@@ -7,11 +7,12 @@ description: Use when a Playwright test fails, flakes or times out, when `Schema
 
 ## Critical
 
-- **Read the failure message before touching code.** It names the test, the failed call with expected versus received, and the source line.
+- **Read the failure message before touching code.** Note the test, failed call, expected and received values, and line.
 - **Never suppress a failure.** No `test.skip` without `// FIXME: <ticket-url>` or an approved quarantine, no loosened assertion or schema, no timeout bump, no `try/catch` around `expect`. A response that disagrees with the documented contract follows the `api-testing` protocol.
 - **Never add `page.waitForTimeout(...)` to fix timing.** Use a web-first assertion or `page.waitForResponse(...)` in the page-object action.
 - **Never ship a fix you could not reproduce.** Reproduce locally or replay the CI artifacts first.
 - **Traces exist only after a retry.** `trace: 'on-first-retry'` with `retries: 0` locally means no trace by default; run with `--trace on` or use UI Mode.
+- **Unresolved flakes**: investigate, propose quarantine for human approval; see `references/quarantine.md`.
 - **A flake fix needs 5 consecutive green runs** of the affected file with `--workers=1 --retries=0`.
 - **Never commit `test.only`**; narrow with a file path or `--grep` instead. After every fix, `npm run lint` and the affected file must be green.
 
@@ -39,8 +40,6 @@ description: Use when a Playwright test fails, flakes or times out, when `Schema
 6. Re-run the file (5× for a flake), then `npm run lint`; remove any `test.only` and instrumentation before committing.
 
 ## References
-
-- `references/quarantine.md`: for unresolved flakes.
 
 - `references/tools.md`: step 4, which tool for which failure and the commands.
 - `references/ci-replay.md`: step 3, when CI is red and local is green.

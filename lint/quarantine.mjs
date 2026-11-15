@@ -73,7 +73,14 @@ export default {
                 if (!kind) return;
                 const [title, details] = node.arguments;
                 if (string(title) !== undefined && annotated(details)) return;
-                if (kind === 'skip') {
+                const body = node.arguments.at(-1);
+                if (
+                    kind === 'skip' &&
+                    string(title) !== undefined &&
+                    ['ArrowFunctionExpression', 'FunctionExpression'].includes(
+                        body?.type
+                    )
+                ) {
                     const comments = context.sourceCode.getCommentsBefore(
                         node.parent
                     );

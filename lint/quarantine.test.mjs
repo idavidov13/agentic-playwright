@@ -21,6 +21,8 @@ tester.run('quarantine', rule, {
         "test.describe.parallel.skip('missing', () => {});",
         "test.describe.serial.fixme('missing', () => {});",
         "// FIXME: later\ntest.skip('missing', () => {});",
+        "// FIXME: https://example.com/issue/1\ntest.skip(true, 'reason');",
+        "// FIXME: https://example.com/issue/1\ntest.skip(() => true, 'reason');",
         `test.fixme('bad date', ${annotation.replace('2028-02-29', '2027-02-29')}, () => {});`,
         `test.fixme('missing owner', ${annotation.replace('owner=@alice; ', '')}, () => {});`,
     ].map((code) => ({ code, errors: [{ messageId: 'quarantine' }] })),
