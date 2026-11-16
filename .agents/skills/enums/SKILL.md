@@ -28,12 +28,12 @@ description: Use when adding or extending an enum under enums/** (endpoint path,
 
 1. Classify the value; `ls enums/` resolves `{area}`. URLs and credentials go to `config`, curated test inputs to `data-strategy`, Playwright tuning to `playwright.config.ts`.
 
-    | Value                                                   | Home                                                                                            |
-    | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-    | Endpoint path, route, storage-state path                | `enums/{area}/*` (`ApiEndpoints`, `AppRoutes`, `StorageStatePaths` in `enums/app/app.ts`)       |
-    | UI message (error, success, validation, label, heading) | `enums/{area}/*` (`Messages`), text captured live                                               |
-    | Role or permission name                                 | `enums/util/*` (`Roles` in `enums/util/roles.ts`)                                               |
-    | HTTP status code in an assertion                        | inline literal, `expect(status).toBe(200)`: the sanctioned carve-out from the magic-number rule |
+    | Value                                    | Home                                                                                            |
+    | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
+    | Endpoint path, route, storage-state path | `enums/{area}/*` (`ApiEndpoints`, `AppRoutes`, `StorageStatePaths` in `enums/app/app.ts`)       |
+    | UI message (error, success, validation)  | `enums/{area}/*` (`Messages`), text captured live                                               |
+    | Role or permission name                  | `enums/util/*` (`Roles` in `enums/util/roles.ts`)                                               |
+    | HTTP status code in an assertion         | inline literal, `expect(status).toBe(200)`: the sanctioned carve-out from the magic-number rule |
 
 2. Extend the enum that already groups the value; a new domain gets `enums/{area}/<domain>.ts` with its own JSDoc line.
 3. UI text: open the page with `playwright-cli`, trigger the state, copy the rendered string into the value.

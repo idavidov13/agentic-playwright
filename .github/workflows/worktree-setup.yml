@@ -1,0 +1,86 @@
+# Gates the worktree setup script (.claude/orca/orca-worktree-setup.sh). It is
+# POSIX sh that ships in the template, and no other workflow runs it.
+# ShellCheck reads it as sh. Then the script seeds a real worktree of this
+# checkout: a dry run that must write nothing, a real run that must copy the
+# env file and node_modules and must not copy .playwright-cli/, and a run from
+# a subdirectory that must find everything in place. macOS covers the APFS
+# clone, Linux the plain-copy fallback.
+name: Worktree Setup
+
+permissions:
+    contents: read
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - '.claude/orca/**'
+            - '.github/workflows/worktree-setup.yml'
+    pull_request:
+        paths:
+            - '.claude/orca/**'
+            - '.github/workflows/worktree-setup.yml'
+
+jobs:
+    worktree-setup:
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ubuntu-latest, macos-latest]
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v7
+
+            # Preinstalled on the Ubuntu image only; one run is enough.
+            - name: ShellCheck (POSIX sh)
+              if: runner.os == 'Linux'
+              run: shellcheck --shell=sh .claude/orca/orca-worktree-setup.sh
+
+            - uses: actions/setup-node@v7
+              with:
+                  node-version: 22
+                  cache: npm
+
+            - run: npm ci --prefer-offline
+
+            # What a developer's main checkout holds and git does not: an env
+            # file, an install, and an exploration marker that must stay behind.
+            - name: Seed the main checkout and add a worktree
+              run: |
+                  set -eu
+                  cp env/.env.example env/.env.dev
+                  mkdir -p .playwright-cli
+                  touch .playwright-cli/.last-explored
+                  git worktree add --detach "$RUNNER_TEMP/wt" HEAD
+
+            - name: Dry run writes nothing
+              working-directory: ${{ runner.temp }}/wt
+              run: |
+                  set -eu
+                  sh .claude/orca/orca-worktree-setup.sh --dry-run
+                  test ! -e env/.env.dev
+                  test ! -e node_modules
+                  test -z "$(git status --porcelain --ignored)"
+
+            - name: Real run seeds the worktree
+              working-directory: ${{ runner.temp }}/wt
+              run: |
+                  set -eu
+                  sh .claude/orca/orca-worktree-setup.sh
+                  cmp env/.env.dev "$GITHUB_WORKSPACE/env/.env.dev"
+                  test -d node_modules
+                  npm ls --depth=0 >/dev/null
+                  # The exploration marker is never copied.
+                  test ! -e .playwright-cli
+                  # Only gitignored paths were written.
+                  test -z "$(git status --porcelain)"
+
+            - name: Second run, from a subdirectory, changes nothing
+              working-directory: ${{ runner.temp }}/wt/tests
+              run: |
+                  set -eu
+                  sh ../.claude/orca/orca-worktree-setup.sh
+                  test ! -e node_modules
+                  test ! -e env
+                  test -z "$(git -C .. status --porcelain)"
+                  cmp ../env/.env.dev "$GITHUB_WORKSPACE/env/.env.dev"

@@ -48,7 +48,7 @@ Rules for every agent in this repository. Skills hold the detail; load the one t
 - **No Empty-Body-Only 400**: per-field omission and invalid-type `for...of` tests.
 - **No Feedback-Less POM**: form and CRUD page objects have success, error and validation selectors.
 - **No Substitute UI Exploration**: no IDE or MCP browser, no `codegen`; only `playwright-cli`.
-- **No Silent Coverage Drops**: every documented status code has a test or a `test.skip` with `// FIXME`.
+- **No Silent Coverage Drops**: every documented status code has a test, a `test.skip` with `// FIXME` or a human-set `// SCOPE` line.
 - **No JSON Static Data**: `test-data/static/**` is `.ts` with `as const`.
 
 ## Workflow

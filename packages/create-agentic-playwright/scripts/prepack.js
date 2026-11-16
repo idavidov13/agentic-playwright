@@ -36,9 +36,11 @@ const EXCLUDE_FILES = new Set([
     '.github/dependabot.yml',
     // Repo-only CI: the smoke test packs the initializer (packages/ is excluded
     // above) and the release publishes it to npm -- neither applies to a
-    // generated project.
+    // generated project. The worktree-setup gate checks a script that a
+    // --no-claude project does not have; the script is gated here before it ships.
     '.github/workflows/template-smoke.yml',
     '.github/workflows/release.yml',
+    '.github/workflows/worktree-setup.yml',
     '.github/FUNDING.yml', // author sponsorship link
 ]);
 

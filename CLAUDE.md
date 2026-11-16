@@ -7,3 +7,4 @@
 - Status line: `.claude/settings.local.json` runs `python3 .claude/scripts/status_line.py` (per user; README "Claude Code Custom Status Line").
 - `.claude/scripts/`, `.claude/settings.json`, `.claude/settings.local.json` and `.playwright-cli/` are protected paths: the hook refuses an agent write there, so describe the change to the human, who applies it.
 - A new `*.page.ts` or `*.component.ts` file under `pages/` needs a fresh `playwright-cli` exploration marker (`.playwright-cli/.last-explored`, touched by `scripts/playwright-cli.sh`, 240 minutes max); explore first, then write.
+- A git worktree without `env/.env.dev` or `node_modules`: run `sh .claude/orca/orca-worktree-setup.sh` (seeds it from the main checkout; README "Git Worktrees (Orca)"). It never copies `.playwright-cli/`; explore again in the worktree.

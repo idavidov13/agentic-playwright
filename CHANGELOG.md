@@ -4,6 +4,36 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ---
 
+## v2.0.4 -- A Human-Set Test Scope, Worktree Setup for Orca -- 2026-11-14
+
+### Rules layer
+
+- **A human-set scope narrows the API coverage matrix.** A scenario list from the human, or a priority list with a cut-off, sets which rows are automated; each row they cut stays in the spec as a `// SCOPE` line naming the row and who cut it. A cut removes whole rows, the baseline rows included; the request-body rows (empty body, omitted field, wrong types) are cut together or not at all. With no list, or a priority list with no cut-off, the full matrix applies, and the agent never cuts a row on its own. **No Silent Coverage Drops** accepts the `// SCOPE` line, and row 10 of the `pr-reviewer` checklist and the Copilot review prompt (`.github/prompts/pr-reviewer.prompt.md`, Coverage gaps) with it.
+- **The coverage matrix's status codes are the demo API's convention, its scenarios are the rule.** The expected status and error body come from the contract of the API under test. A baseline row the contract does not document is captured live, flagged and named in the plan, never assumed from the table; a live answer that looks wrong (a 5xx, a 2xx for invalid input) goes to the human. The verification checklist names those rows by scenario (missing auth, wrong role, unsupported method) instead of by code.
+- **A `// SCOPE` line can name several rows.** Rows of one `test.describe` cut by the same source share one line, and `git grep -n '// SCOPE' -- tests/` lists every cut; when the cut-off moves, the human's new list replaces the lines. The reviewer copies say "the rows and who cut them".
+- **A test built on an undocumented row is marked `// OBSERVED`.** A status or body the contract does not document, captured live, carries `// OBSERVED: <what the contract omits>, captured <YYYY-MM-DD>` above its test, so it reads as an observation, not an expectation. It is a third record next to `FIXME` (mismatch, skipped) and `SCOPE` (human cut). The `pr-reviewer` checklist row 10, the Copilot review prompt, the verification checklist and `AI-WORKFLOWS.md` check for it.
+- **The README callout asks three review questions**: would the test fail if the feature broke, is every row left out recorded in a `// SCOPE` line, does it pass on a rerun.
+- **Changing a rule includes the skill evals.** Step 4 of `CONTRIBUTING.md` "Changing a rule" names `.claude/skills/*/evals/evals.json`, whose expected behaviour can name a rule.
+- **The `api-testing` contract-mismatch example is a complete test.** It moved from the skill's Critical section to `references/negative-testing.md` ("Contract mismatch"), which Critical now points to. It takes the `apiRequest` fixture, makes the call with its options in full, asserts the documented `status` and parses the body with the response schema; an empty `test.skip` fails `npm run lint`.
+- **Only UI messages are sent to the `Messages` enums.** The `enums` table, the `data-strategy` rule and row 12 of the `pr-reviewer` checklist no longer name labels, headings or "UI strings" as enum values. A role name or a label sits inline in its page-object locator, as the `selectors` skill and the example page objects already show.
+
+### Worktree setup (Orca)
+
+- **`.claude/orca/orca-worktree-setup.sh` seeds a new git worktree** with the gitignored files that stay behind in the main checkout: `env/.env.dev` and `node_modules` (required; `node_modules` is a copy-on-write clone on APFS), every other `env/.env.*`, `.husky/_`, `.auth` and `.claude/settings.local.json` (optional). Wire it once as the Orca setup script, or run it by hand from any directory inside a worktree; `--dry-run` prints what would be copied, `--force` overwrites, except a path git tracks, which keeps its branch's version. Nothing else calls it, so without Orca the file is inert.
+- **It verifies the install it copied**: `npm ls` against `package.json`, and `package-lock.json` against npm's record of what is installed, in both directions. A stale copy is reinstalled with `npm ci --prefer-offline` from the worktree's own lockfile. Without `npm` or `node` on `PATH` the check is skipped and the summary says the dependencies were not verified.
+- **CI gates the script** (`.github/workflows/worktree-setup.yml`): ShellCheck reads it as POSIX sh, then it seeds a real worktree on Linux and macOS: a dry run that must write nothing, a real run, and a run from a subdirectory. The workflow is repo-only; `prepack.js` leaves it out of a scaffolded project.
+- **`.playwright-cli/` is never copied**, so a worktree cannot inherit the exploration marker: Explore Before Generate holds in each worktree.
+- The script ships in the template (a project scaffolded with `--no-claude` does not have it). `CLAUDE.md` gains one line that points a Claude Code session in an unseeded worktree to it.
+
+### Docs
+
+- The README states near the top what the scaffold guarantees (the form of a test) and what stays with human review (its value); the selector section says where UI text lives: a message found by text in the `Messages` enums, a role name or a label inline in the page object, none of it in a spec.
+- README "Adapting the Scaffold" gains a step, "Match Your API's Error Conventions": change the shared error schemas and the matrix's Status column once for your API. `AI-WORKFLOWS.md` says the listed codes are the demo API's.
+- `CONTRIBUTING.md` gains "Changing a rule", the order in which a rule's copies are edited, and asks for an issue before a large or design-level change.
+- README "Git Worktrees (Orca)" and a troubleshooting entry describe the worktree setup; `CONTRIBUTING.md` points to it.
+
+---
+
 ## v2.0.3 -- Scope Qualifiers Restored, Test Isolation a MUST -- 2026-11-13
 
 ### Rules layer

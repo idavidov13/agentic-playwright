@@ -38,7 +38,8 @@ Follow the test-standards skill for the loop.
 Create API tests for [METHOD] [/path]:
 - request body fields: [fields and types]
 - documented responses: [status codes]
+- scope: [all documented codes, or the scenarios to automate]
 - area folder: [run `ls tests/` and `ls fixtures/api/schemas/`]
 
-Source the contract from the OpenAPI document and present the coverage plan (every documented status code and what covers it) before writing code. Schema in fixtures/api/schemas/{area}/, endpoint path in enums/{area}/, tag @api. Follow the api-testing skill end to end, including the negative loops and the test.skip + // FIXME protocol for mismatches.
+Source the contract from the OpenAPI document and present the coverage plan (every documented status code and what covers it, or the // SCOPE line the scope leaves it with) before writing code. Schema in fixtures/api/schemas/{area}/, endpoint path in enums/{area}/, tag @api. Follow the api-testing skill end to end, including the negative loops and the test.skip + // FIXME protocol for mismatches.
 ```

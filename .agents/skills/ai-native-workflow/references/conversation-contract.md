@@ -15,6 +15,8 @@ An input is primary when the task cannot be planned without it. Missing → ask;
 | Enum or static-value change     | the exact old and new value, and whether the backend change is live                                              |
 | Debug                           | the failing spec path and the failure output (local run or CI run id)                                            |
 
+Optional for an API test: a scenario list, or a priority list with a cut-off. Given, it sets which coverage rows are automated (`api-testing` step 5); absent, the full matrix applies. A priority list with no cut-off is not a scope: propose every row and ask where the line is. It is not primary: the task can be planned without it.
+
 ## Stop and ask
 
 - Two valid approaches with a real trade-off: an architectural decision belongs to the human.

@@ -23,6 +23,8 @@
   plus the AI rules your assistant picks up automatically, from the very first prompt.
 </p>
 
+> **What it guarantees, and what it does not.** The rules, the hook and the gates guarantee the form of a test: structure, selectors, schemas, data, tags. They do not guarantee its value. Which scenarios matter, and whether a test would catch a real bug, is decided in human review before the commit. Three questions for that review: would this test fail if the feature broke? Is every row left out recorded in a `// SCOPE` line? Does it pass on a rerun?
+
 ## See it
 
 From the (empty) directory your project should live in — the `.` means "scaffold right
@@ -112,6 +114,7 @@ _Not affiliated with Microsoft. [Playwright](https://playwright.dev/) is an open
 - [Coding Standards](#coding-standards)
 - [Core Principles (The Constitution)](#core-principles-the-constitution)
 - [AI-Assisted Development Workflow](#ai-assisted-development-workflow)
+    - [Git Worktrees (Orca)](#git-worktrees-orca)
 - [AI Rules Architecture](#ai-rules-architecture)
 - [Architecture Overview](#architecture-overview)
 - [Troubleshooting](#troubleshooting)
@@ -411,7 +414,16 @@ Edit `helpers/app/createStorageState.ts` to match your app's actual login flow. 
 - `createAppStorageState()` -- Browser-based login for storage state
 - `setUserAccessToken()` -- API-based login for access tokens
 
-### Step 5: Write Your First Real Test
+### Step 5: Match Your API's Error Conventions
+
+The API coverage matrix and the shared error schemas describe the demo API: 422 for a validation error, `{ error }` as the 401 body. Your API may answer differently (400 instead of 422, another error body). Change both once:
+
+- `fixtures/api/schemas/util/errorResponseSchema.ts`: your API's error shapes.
+- The Status column in `.claude/skills/api-testing/references/coverage-matrix.md`, then `npm run skills:sync`. Keep the Scenario column: the scenarios are the rule, the codes are a convention.
+
+Until you do, the agent still takes each expected status from your API contract, and captures live (flagged in its plan) what the contract leaves out.
+
+### Step 6: Write Your First Real Test
 
 Replace the example tests in `tests/app/functional/` with tests for your application. Follow the pattern in the example files:
 
@@ -437,7 +449,7 @@ test.describe('Your Feature', () => {
 });
 ```
 
-### Step 6: Run and Verify
+### Step 7: Run and Verify
 
 ```bash
 npm test
@@ -497,6 +509,8 @@ root/
 │
 ├── .claude/                   # Claude Code configuration and the canonical skills
 │   ├── settings.json          # Hook wiring (PreToolUse: the Constitution hook)
+│   ├── orca/
+│   │   └── orca-worktree-setup.sh       # Orca setup hook: seeds a new git worktree with the gitignored files (env, node_modules, husky hooks)
 │   ├── scripts/
 │   │   ├── enforce_constitution.py      # PreToolUse hook: 18 mechanical rules; --scan mode for reviews, pre-commit and CI
 │   │   └── status_line.py               # Custom status line renderer (Gruvbox Dark theme)
@@ -531,6 +545,7 @@ root/
 │   │   ├── skill-lint.yml     # The eight rule-layer gates and the version gate
 │   │   ├── playwright.yml     # API tests against the demo app (non-blocking)
 │   │   ├── template-smoke.yml # Pack the initializer, scaffold projects, run their gates
+│   │   ├── worktree-setup.yml # ShellCheck and a real worktree run of the Orca setup script (Linux, macOS)
 │   │   └── release.yml        # Publish create-agentic-playwright on a version tag
 │   ├── ISSUE_TEMPLATE/        # Bug, feature and rule-quality reports
 │   ├── PULL_REQUEST_TEMPLATE.md
@@ -978,6 +993,8 @@ page.getByRole('region', { name: 'Orders' }).locator('[data-row-id]');
 ```
 
 `npm run lint` fails a raw `locator()` without that line.
+
+Specs hold no UI text: they assert on the locators a page object exposes. A message found by text (`getByText`) comes from the `Messages` enum under `enums/{area}/`; a role name or a label sits inline in its page-object getter. A wording change is an edit in the enum or the page object, never in a spec.
 
 ### Registering Page Objects
 
@@ -1478,6 +1495,39 @@ git reset --hard HEAD~3
 
 This is why **committing after each verified change** is critical. Each commit is a safe checkpoint you can return to at any time.
 
+### Git Worktrees (Orca)
+
+Running several agents in parallel means one git worktree per task. A new worktree holds only the tracked files, so everything gitignored is missing: no `env/.env.dev` (tests navigate to `undefined`), no `node_modules` (nothing lints or runs) and no `.husky/_` (`core.hooksPath` points there, so a commit skips every pre-commit gate without saying so).
+
+`.claude/orca/orca-worktree-setup.sh` seeds a new worktree from the main checkout. It is written as an Orca setup hook. Wire it once, in Orca under **Settings → Repository Hooks → Setup Script**:
+
+```bash
+sh "$ORCA_ROOT_PATH/.claude/orca/orca-worktree-setup.sh"
+```
+
+Orca then runs it for every worktree it creates and passes `ORCA_ROOT_PATH` (the main checkout) and `ORCA_WORKTREE_PATH`. It reads the script from the main checkout, so the script has to exist on the branch checked out there. Nothing else in the project calls it: without Orca the file is inert. It also runs by hand from any directory inside a worktree, where both paths are derived from git:
+
+```bash
+sh .claude/orca/orca-worktree-setup.sh --dry-run   # print what would be copied
+sh .claude/orca/orca-worktree-setup.sh             # copy what is missing
+sh .claude/orca/orca-worktree-setup.sh --force     # overwrite what is already there
+```
+
+| Item                          | Mode     | Why                                                                                          |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `env/.env.dev`                | required | URLs and credentials; `playwright.config.ts` loads it by default                             |
+| `node_modules`                | required | Copy-on-write clone on APFS (seconds, almost no extra disk), a plain copy elsewhere          |
+| every other `env/.env.*`      | optional | The environments `ENVIRONMENT=<name>` selects; `env/.env.example` is tracked, so it is there |
+| `.husky/_`                    | optional | The directory `core.hooksPath` points to; `npm ci` recreates it too                          |
+| `.auth`                       | optional | Saved storage states; the setup projects regenerate them                                     |
+| `.claude/settings.local.json` | optional | Per-user status line wiring                                                                  |
+
+An item already present in the worktree is skipped unless `--force` is passed. A path git tracks is never overwritten, `--force` included: the worktree keeps its branch's version. A required item missing from the main checkout, or any failed copy, ends the run with `worktree is INCOMPLETE` and exit code 1; a missing optional item is only noted. An unknown flag exits 2. Run from the main checkout itself, at any depth, the script does nothing. The script lives under `.claude/`, so a project scaffolded with `--no-claude` does not have it.
+
+After the copy it checks the dependencies twice: `npm ls --depth=0` compares `node_modules` with `package.json`, and a lockfile comparison sets `package-lock.json` against `node_modules/.package-lock.json`, npm's record of what it installed, in both directions. The copied `node_modules` is only as fresh as the main checkout's last install, so when either check fails (a dependency bump that was never installed in main, or a branch whose `package.json` differs) the script runs `npm ci --prefer-offline` there and, when that fails, prints the last lines of its output. It also warns when the main checkout itself is out of sync, with the command that fixes it at the source. Without `npm` or `node` on `PATH` the check is skipped: the note names what is missing, the summary line says the dependencies were not verified, and the run still exits 0 because the copy itself succeeded.
+
+`.playwright-cli/` is deliberately **not** copied. It holds the exploration session state and the `.last-explored` marker, and a copied marker would open the Explore Before Generate gate in a worktree where no exploration happened. Explore again in the worktree. Generated output (`test-results/`, `playwright-report/`, `blob-report/`) is not copied either.
+
 ---
 
 ## AI Rules Architecture
@@ -1567,6 +1617,16 @@ cp env/.env.example env/.env.dev
 ```
 
 Then edit it with your application's actual URLs and credentials.
+
+### A new git worktree cannot lint, run tests or run the pre-commit gates
+
+A worktree is created with the tracked files only: `env/.env.dev`, `node_modules` and `.husky/_` are gitignored and stay behind in the main checkout. Seed the worktree from it:
+
+```bash
+sh .claude/orca/orca-worktree-setup.sh
+```
+
+See [Git Worktrees (Orca)](#git-worktrees-orca) for what it copies and how to make Orca run it for every new worktree.
 
 ### `browserType.launch: Executable doesn't exist`
 
