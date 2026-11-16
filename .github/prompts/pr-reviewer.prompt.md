@@ -118,7 +118,7 @@ Check at minimum:
 - **Contract fidelity (STRICT).** Schemas mirror the documented OpenAPI/Swagger contract. When live API disagrees with the contract, the API is the bug, NEVER the schema. Flag as 🔴 any schema-loosening (`z.strictObject`→`z.object`; added `.optional()`/`.nullable()`/`.passthrough()`/`.catchall()` or widened type to swallow a runtime value; deleted documented field; precise validator → looser) even if it makes a test pass. Sanctioned fix: `test.skip` + `// FIXME: <ticket>`.
 - **Sibling consistency** — divergence from the nearest file of the same kind is a finding.
 - **Real bugs** — logic errors, wrong assertions, `.find()` on possibly-empty response, off-by-one, copy-paste leftovers (stale qase IDs, wrong endpoint).
-- **Coverage gaps** + **scope creep**.
+- **Coverage gaps** — every documented status code has a test, a `test.skip` + `// FIXME`, or a `// SCOPE` line naming the row and who cut it; a `// SCOPE` line with no source is a finding — + **scope creep**.
 
 ### Phase 6 — Constitution checklist (MANDATORY GATE)
 
