@@ -44,7 +44,7 @@ const TEMPLATE_DIR = path.resolve(__dirname, '..', 'template');
 const DEMO_ENV = {
     APP_URL: 'https://practicesoftwaretesting.com',
     API_URL: 'https://api.practicesoftwaretesting.com',
-    APP_EMAIL: 'customer@practicesoftwaretesting.com',
+    APP_EMAIL: 'customer2@practicesoftwaretesting.com',
     APP_PASSWORD: 'welcome01',
 };
 

@@ -32,6 +32,10 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 - `CONTRIBUTING.md` gains "Changing a rule", the order in which a rule's copies are edited, and asks for an issue before a large or design-level change.
 - README "Git Worktrees (Orca)" and a troubleshooting entry describe the worktree setup; `CONTRIBUTING.md` points to it.
 
+### Demo credentials
+
+- **The demo user is `customer2@practicesoftwaretesting.com`.** The demo API locks `customer@practicesoftwaretesting.com` (423 on login), which failed the API auth setup in CI. The Playwright workflow and the initializer's demo `env/.env.dev` use `customer2`; the password stays `welcome01`.
+
 ---
 
 ## v2.0.3 -- Scope Qualifiers Restored, Test Isolation a MUST -- 2026-11-13
