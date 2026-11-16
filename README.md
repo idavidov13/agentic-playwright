@@ -545,6 +545,7 @@ root/
 │   │   ├── skill-lint.yml     # The eight rule-layer gates and the version gate
 │   │   ├── playwright.yml     # API tests against the demo app (non-blocking)
 │   │   ├── template-smoke.yml # Pack the initializer, scaffold projects, run their gates
+│   │   ├── worktree-setup.yml # ShellCheck and a real worktree run of the Orca setup script (Linux, macOS)
 │   │   └── release.yml        # Publish create-agentic-playwright on a version tag
 │   ├── ISSUE_TEMPLATE/        # Bug, feature and rule-quality reports
 │   ├── PULL_REQUEST_TEMPLATE.md

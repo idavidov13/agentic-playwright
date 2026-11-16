@@ -197,7 +197,7 @@ lock_matches() {
             if (!have || have.version !== want.version) process.exit(1);
         }
         for (const name of Object.keys(installed)) {
-            // installed, but gone from the lockfile: `npm ci` would remove it
+            // installed, but gone from the lockfile: npm ci would remove it
             if (name.startsWith("node_modules/") && !lock[name]) process.exit(1);
         }
     ' 2>/dev/null
