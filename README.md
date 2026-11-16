@@ -23,7 +23,7 @@
   plus the AI rules your assistant picks up automatically, from the very first prompt.
 </p>
 
-> **What it guarantees, and what it does not.** The rules, the hook and the gates guarantee the form of a test: structure, selectors, schemas, data, tags. They do not guarantee its value. Which scenarios matter, and whether a test would catch a real bug, is decided in human review before the commit.
+> **What it guarantees, and what it does not.** The rules, the hook and the gates guarantee the form of a test: structure, selectors, schemas, data, tags. They do not guarantee its value. Which scenarios matter, and whether a test would catch a real bug, is decided in human review before the commit. Three questions for that review: would this test fail if the feature broke? Is every row left out recorded in a `// SCOPE` line? Does it pass on a rerun?
 
 ## See it
 
