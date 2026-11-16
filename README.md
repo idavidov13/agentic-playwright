@@ -993,7 +993,7 @@ page.getByRole('region', { name: 'Orders' }).locator('[data-row-id]');
 
 `npm run lint` fails a raw `locator()` without that line.
 
-UI copy lives in the `Messages` enums under `enums/{area}/` and specs assert on page-object getters, so a wording change is one enum edit, not a spec edit.
+Specs hold no UI text: they assert on the locators a page object exposes. A message found by text (`getByText`) comes from the `Messages` enum under `enums/{area}/`; a role name or a label sits inline in its page-object getter. A wording change is an edit in the enum or the page object, never in a spec.
 
 ### Registering Page Objects
 

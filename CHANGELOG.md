@@ -10,6 +10,7 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 - **A human-set scope narrows the API coverage matrix.** A scenario list from the human, or a priority list with a cut-off, sets which rows are automated; each row they cut stays in the spec as a `// SCOPE` line naming the row and who cut it. A cut removes whole rows, the baseline rows included; the request-body rows (empty body, omitted field, wrong types) are cut together or not at all. With no list, or a priority list with no cut-off, the full matrix applies, and the agent never cuts a row on its own. **No Silent Coverage Drops** accepts the `// SCOPE` line, and row 10 of the `pr-reviewer` checklist with it.
 - **The coverage matrix's status codes are the demo API's convention, its scenarios are the rule.** The expected status and error body come from the contract of the API under test. A baseline row the contract does not document is captured live, flagged and named in the plan, never assumed from the table; a live answer that looks wrong (a 5xx, a 2xx for invalid input) goes to the human. The verification checklist names those rows by scenario (missing auth, wrong role, unsupported method) instead of by code.
+- **Only UI messages are sent to the `Messages` enums.** The `enums` table, the `data-strategy` rule and row 12 of the `pr-reviewer` checklist no longer name labels, headings or "UI strings" as enum values. A role name or a label sits inline in its page-object locator, as the `selectors` skill and the example page objects already show.
 
 ### Worktree setup (Orca)
 
@@ -20,7 +21,7 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ### Docs
 
-- The README states near the top what the scaffold guarantees (the form of a test) and what stays with human review (its value); the selector section says where UI copy lives: the `Messages` enums, behind page-object getters.
+- The README states near the top what the scaffold guarantees (the form of a test) and what stays with human review (its value); the selector section says where UI text lives: a message found by text in the `Messages` enums, a role name or a label inline in the page object, none of it in a spec.
 - README "Adapting the Scaffold" gains a step, "Match Your API's Error Conventions": change the shared error schemas and the matrix's Status column once for your API. `AI-WORKFLOWS.md` says the listed codes are the demo API's.
 - `CONTRIBUTING.md` gains "Changing a rule", the order in which a rule's copies are edited, and asks for an issue before a large or design-level change.
 - README "Git Worktrees (Orca)" and a troubleshooting entry describe the worktree setup; `CONTRIBUTING.md` points to it.
