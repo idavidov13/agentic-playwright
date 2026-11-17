@@ -4,6 +4,13 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ---
 
+## v2.0.5 -- A Quarantine Convention for Flaky Tests -- 2026-11-17
+
+### Rules layer
+
+- **A flaky test that cannot be fixed now is quarantined, never silently skipped.** The agent investigates, then proposes a declaration-form `test.fixme` with a `quarantine` annotation (`owner=@handle; until=YYYY-MM-DD`); a human approves it and names the owner and the expiry. The procedure is `debugging` step 7 and `references/quarantine.md`.
+- **ESLint enforces it for every spec under `tests/`** (`quarantine/annotation`, `lint/quarantine.mjs`): a skip passes only with the annotation or, for a contract mismatch, `test.skip` with `// FIXME: <ticket-url>` on the line above. A bare skip, the in-body forms (`test.skip(true, ...)`, `testInfo.skip()`) and `test.step.skip()` fail `npm run lint`. The expiry date is checked for form, not for having passed.
+
 ## v2.0.4 -- A Human-Set Test Scope, Worktree Setup for Orca -- 2026-11-14
 
 ### Rules layer

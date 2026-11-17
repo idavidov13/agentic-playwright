@@ -7,18 +7,19 @@ description: Use when a Playwright test fails, flakes or times out, when `Schema
 
 ## Critical
 
-- **Read the failure message before touching code.** It names the test, the failed call with expected versus received, and the source line.
-- **Never suppress a failure.** No `test.skip` without `// FIXME: <ticket-url>`, no loosened assertion or schema, no timeout bump, no `try/catch` around `expect`. A response that disagrees with the documented contract follows the `api-testing` protocol.
+- **Read the failure message before touching code.** Note the test, failed call, expected and received values, and line.
+- **Never suppress a failure.** No `test.skip` without `// FIXME: <ticket-url>` or an approved quarantine, no loosened assertion or schema, no timeout bump, no `try/catch` around `expect`. A response that disagrees with the documented contract follows the `api-testing` protocol.
 - **Never add `page.waitForTimeout(...)` to fix timing.** Use a web-first assertion or `page.waitForResponse(...)` in the page-object action.
 - **Never ship a fix you could not reproduce.** Reproduce locally or replay the CI artifacts first.
-- **Traces exist only after a retry.** `trace: 'on-first-retry'` with `retries: 0` locally means no trace by default; run with `--trace on` or use UI Mode.
+- **Traces exist only after a retry.** `trace: 'on-first-retry'` with `retries: 0` locally means no trace; run with `--trace on` or use UI Mode.
+- **Unresolved flakes**: investigate, propose quarantine for human approval; see `references/quarantine.md`.
 - **A flake fix needs 5 consecutive green runs** of the affected file with `--workers=1 --retries=0`.
-- **Never commit `test.only`**; narrow with a file path or `--grep` instead. After every fix, `npm run lint` and the affected file must be green.
+- **Never commit `test.only`**; narrow with a file path or `--grep`. After every fix, `npm run lint` and the affected file must be green.
 
 ## Procedure
 
 1. Read the failure output in full.
-2. Classify with the table; the next step names the tool and the owning skill.
+2. Classify with the table; the next step names the tool and owning skill.
 
     | Symptom                                                       | Likely cause                                                    | Next step                                                                                                  |
     | ------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -33,12 +34,14 @@ description: Use when a Playwright test fails, flakes or times out, when `Schema
     | `appPage is undefined`, `cannot read property of undefined`   | fixture not registered, `test` imported from `@playwright/test` | `fixtures`; `npm run lint`                                                                                 |
     | green alone, red in the suite                                 | shared state between tests, missing `resetStorageState`         | `test-standards` (independence)                                                                            |
 
-3. Reproduce: `npx playwright test <file> --workers=1 --retries=0`, `--grep "<title>"` to narrow further. Green locally, red in CI → `references/ci-replay.md`.
+3. Reproduce: `npx playwright test <file> --workers=1 --retries=0`, `--grep "<title>"` to narrow. Green locally, red in CI → `references/ci-replay.md`.
 4. Investigate with one tool from `references/tools.md`.
-5. Fix at the root cause in the file the table names, not by patching the spec around it.
-6. Re-run the file (5× for a flake), then `npm run lint`; remove any `test.only` and instrumentation before committing.
+5. Fix at the root cause in the file the table names, not by patching the spec.
+6. Re-run the file (5× for a flake), then `npm run lint`; remove `test.only` and instrumentation.
+7. Flake persists: `references/quarantine.md`.
 
 ## References
 
 - `references/tools.md`: step 4, which tool for which failure and the commands.
 - `references/ci-replay.md`: step 3, when CI is red and local is green.
+- `references/quarantine.md`: step 7, quarantine form.

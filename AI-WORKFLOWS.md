@@ -153,6 +153,7 @@ Phase 4's proposal **must** carry a 1-10 confidence — the number gates whether
 | 5    | Fix at the **root cause** — no `try/catch` on `expect`, no timeout bumps, no silent `.skip`.               | `debugging` · step 5 | —                   |
 | 6    | Re-run; for flake fixes, run **5× consecutively**.                                                         | `debugging` · step 6 | Green & stable.     |
 | 7    | Red in CI, green locally? Replay CI conditions: `CI=1 npx playwright test <file> --workers=1 --retries=0`. | `debugging` · step 3 | —                   |
+| 8    | Flake you cannot fix now? Propose a quarantine with the evidence; a human approves owner and expiry.       | `debugging` · step 7 | Owner + expiry set. |
 
 **Failure mode → tool / fix:**
 

@@ -128,7 +128,7 @@ Check at minimum:
 .agents/skills/pr-reviewer/scripts/scan-constitution.sh "$BASE"
 ```
 
-Then read `.agents/skills/pr-reviewer/references/constitution-checklist.md` and walk the judgment items (coverage gaps, sibling divergence, schema-vs-contract fidelity, cleanup hooks, return types, feedback-message selectors) against the three-dot diff. Record ✅/❌/➖ with `file:line`. Every ❌ becomes a report finding at its tier. Couldn't evaluate (env) → say so, don't mark ✅.
+Then read `.agents/skills/pr-reviewer/references/constitution-checklist.md` and walk the judgment items (coverage gaps, sibling divergence, schema-vs-contract fidelity, cleanup hooks, return types, feedback-message selectors, quarantine approval) against the three-dot diff. Record ✅/❌/➖ with `file:line`. Every ❌ becomes a report finding at its tier. Couldn't evaluate (env) → say so, don't mark ✅.
 
 ### Phase 7 — Report
 
@@ -156,3 +156,4 @@ Only if Phase 8 changed files and re-verification passes. Never commit without e
 - Runtime ≠ contract: report mismatches via `test.skip` + `// FIXME`, never relax the schema.
 - Env failures aren't branch failures.
 - A comment/test-name vs code gap is itself a finding.
+- Flag quarantine without human approval, a named owner, expiry and investigation evidence.

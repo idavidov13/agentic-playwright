@@ -2,6 +2,7 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import prettierPlugin from 'eslint-plugin-prettier';
 import playwright from 'eslint-plugin-playwright';
+import quarantine from './lint/quarantine.mjs';
 
 /**
  * Prettier configuration for consistent code formatting.
@@ -90,8 +91,9 @@ const config = [
             // OFF, deliberately: the Constitution MANDATES `test.skip` +
             // `// FIXME` for documented-but-broken endpoints (WON'T: No
             // Silent Coverage Drops) — this rule at error/warn would fail CI
-            // on exactly that sanctioned pattern. Unjustified skips are a
-            // review-time finding (pr-reviewer checklist), not a lint error.
+            // on exactly that sanctioned pattern. `quarantine/annotation`
+            // (below, tests/** only) is the gate instead: a skip passes with
+            // `// FIXME: <ticket-url>` or a quarantine annotation.
             'playwright/no-skipped-test': 'off',
 
             // Additional Playwright rules for Constitution compliance
@@ -115,6 +117,11 @@ const config = [
             'playwright/no-focused-test': 'error', // No test.only in commits
             'playwright/no-standalone-expect': 'error', // Expect must be in test
         },
+    },
+    {
+        files: ['tests/**/*.ts', 'tests/**/*.tsx'],
+        plugins: { quarantine: { rules: { annotation: quarantine } } },
+        rules: { 'quarantine/annotation': 'error' },
     },
 ];
 
