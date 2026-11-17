@@ -23,7 +23,7 @@
   plus the AI rules your assistant picks up automatically, from the very first prompt.
 </p>
 
-> **What it guarantees, and what it does not.** The rules, the hook and the gates guarantee the form of a test: structure, selectors, schemas, data, tags. They do not guarantee its value. Which scenarios matter, and whether a test would catch a real bug, is decided in human review before the commit.
+> **What it guarantees, and what it does not.** The rules, the hook and the gates guarantee the form of a test: structure, selectors, schemas, data, tags. They do not guarantee its value. Which scenarios matter, and whether a test would catch a real bug, is decided in human review before the commit. Three questions for that review: would this test fail if the feature broke? Is every row left out recorded in a `// SCOPE` line? Does it pass on a rerun?
 
 ## See it
 
@@ -545,6 +545,7 @@ root/
 │   │   ├── skill-lint.yml     # The eight rule-layer gates and the version gate
 │   │   ├── playwright.yml     # API tests against the demo app (non-blocking)
 │   │   ├── template-smoke.yml # Pack the initializer, scaffold projects, run their gates
+│   │   ├── worktree-setup.yml # ShellCheck and a real worktree run of the Orca setup script (Linux, macOS)
 │   │   └── release.yml        # Publish create-agentic-playwright on a version tag
 │   ├── ISSUE_TEMPLATE/        # Bug, feature and rule-quality reports
 │   ├── PULL_REQUEST_TEMPLATE.md
@@ -993,7 +994,7 @@ page.getByRole('region', { name: 'Orders' }).locator('[data-row-id]');
 
 `npm run lint` fails a raw `locator()` without that line.
 
-UI copy lives in the `Messages` enums under `enums/{area}/` and specs assert on page-object getters, so a wording change is one enum edit, not a spec edit.
+Specs hold no UI text: they assert on the locators a page object exposes. A message found by text (`getByText`) comes from the `Messages` enum under `enums/{area}/`; a role name or a label sits inline in its page-object getter. A wording change is an edit in the enum or the page object, never in a spec.
 
 ### Registering Page Objects
 

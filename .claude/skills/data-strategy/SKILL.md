@@ -27,7 +27,7 @@ description: Use when creating or extending a data factory, adding a static set 
 
 - Never redefine the universal type-mismatch arrays inline; import `INVALID_STRING_VALUES`, `INVALID_NUMBER_VALUES`, `INVALID_BOOLEAN_VALUES`, `INVALID_UUID_VALUES`, `INVALID_ENUM_VALUES`, `INVALID_ARRAY_VALUES` and `INVALID_OBJECT_VALUES` from `test-data/static/util/invalid-values.ts`.
 - A factory merges `overrides` over Faker defaults, returns `Schema.parse(merged)` and carries the Zod-inferred return type; never a cast.
-- Never Faker-generate an app-defined string (error message, label, heading, route); those come from `enums/{area}/*` (`enums`).
+- Never Faker-generate an app-defined string (error message, label, heading, route): it is the app's text, captured live; messages and routes come from `enums/{area}/*` (`enums`).
 - A value used in exactly one assertion stays inline in the test; a static file holds a curated set that a loop iterates.
 - Editing an existing static value or enum member goes through `refactor-values` first.
 - No magic numbers inline (timeouts, retry counts, limits): suite tuning in `playwright.config.ts` (`config`), domain limits in `enums/{area}/*`, a per-assertion `{ timeout }` only with a comment saying why.

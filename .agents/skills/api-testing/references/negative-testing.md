@@ -116,3 +116,27 @@ for (const { description, value } of invalidProductIds) {
 ## Query-parameter loop
 
 For documented query parameters (pagination, filters, sorting) compose the query onto the enum path, `` `${ApiEndpoints.PRODUCTS}?page=${value}` ``: the enum owns the path, the contract owns the parameter values. Cover an invalid type per parameter (`page=abc`, `limit=-1`), out-of-range values, and unknown parameters when the contract defines their behaviour. A list response (data array plus pagination metadata) gets its own `z.strictObject` schema like any other response.
+
+## Contract mismatch
+
+The API answers 500 where the contract documents 422. The test stays as the contract says, skipped, with the ticket; it is complete, so it runs green once the API is fixed and the skip is removed. Same imports as the invalid-type loop.
+
+```typescript
+// FIXME: <ticket-url> spec 422, API 500
+test.skip(
+    'should return 422 when price is negative',
+    { tag: '@api' },
+    async ({ apiRequest }) => {
+        const { status, body } = await apiRequest<UnprocessableEntityResponse>({
+            method: 'POST',
+            url: ApiEndpoints.PRODUCTS,
+            baseUrl: process.env.API_URL,
+            headers: process.env.ACCESS_TOKEN,
+            body: { ...generateProduct(), price: -1 },
+        });
+
+        expect(status).toBe(422); // the contract, never the observed 500
+        expect(UnprocessableEntityResponseSchema.parse(body)).toBeTruthy();
+    }
+);
+```

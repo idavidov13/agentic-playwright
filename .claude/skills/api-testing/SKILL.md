@@ -7,8 +7,8 @@ description: Use when writing or updating an API spec under tests/**/api/**, pla
 
 ## Critical
 
-- Never hardcode API URLs, access tokens, emails, passwords or endpoint paths: only `process.env.API_URL`, `process.env.ACCESS_TOKEN`, `process.env.APP_EMAIL` / `APP_PASSWORD` and `ApiEndpoints` from `enums/{area}/*`.
-- Schemas and tests come from the documented contract (OpenAPI / Swagger), never from a request made first; none found: ask before live capture.
+- Never hardcode API URLs, access tokens, emails, passwords or endpoint paths: only `process.env.API_URL`, `process.env.ACCESS_TOKEN`, `process.env.APP_EMAIL`, `APP_PASSWORD` and `ApiEndpoints` from `enums/{area}/*`.
+- Schemas and tests come from the documented contract (OpenAPI/Swagger), never from a request made first; none found: ask before live capture.
 - Assert every response body with `expect(SchemaName.parse(body)).toBeTruthy();`, not a generic or a bare parse; in fixture code, with no test, `const x = SchemaName.parse(body);`. Never `as`-cast.
 
     ```typescript
@@ -19,20 +19,12 @@ description: Use when writing or updating an API spec under tests/**/api/**, pla
     ```
 
 - A test with more than one API call wraps each call in its own `test.step()`, assertions inside.
-- Never change an expected status, loosen a schema or drop a test: keep it as the contract says, wrapped in `test.skip` with `// FIXME: <ticket-url>`. 422 where the spec says 400 is a mismatch; only a human confirming a stale spec changes it.
-
-    ```typescript
-    // FIXME: <ticket-url> spec 422, API 500
-    test.skip('returns 422 for bad price', { tag: '@api' }, async () => {
-        expect(status).toBe(422); // CORRECT
-        // WRONG: expect(status).toBe(500);
-    });
-    ```
+- Never change an expected status, loosen a schema or drop a test: keep it as the contract says, in `test.skip` with `// FIXME: <ticket-url>`. 422 where the spec says 400 is a mismatch; only a human confirming a stale spec changes it. Example: `references/negative-testing.md` → "Contract mismatch".
 
 - Every request-body endpoint gets an empty-body test, a per-field omission loop and a per-field invalid-type `for...of` loop over the `INVALID_*` arrays; never empty-body-only.
 - Always fuzz path parameters with the invalid-format loop, documented or not.
 - Only a human-set `// SCOPE` line cuts a row or loop.
-- Call `apiRequest` directly in tests and hooks; promote to a helper fixture in `fixtures/helper/helper-fixture.ts` only when the same setup/teardown is copy-pasted into 3+ test files.
+- Call `apiRequest` directly in tests and hooks; promote to a helper fixture in `fixtures/helper/helper-fixture.ts` only when 3+ test files copy-paste the same setup/teardown.
 
 ## Procedure
 
@@ -49,6 +41,6 @@ description: Use when writing or updating an API spec under tests/**/api/**, pla
 
 - `references/contract-sourcing.md`: open when the contract is partial, missing or unversioned.
 - `references/coverage-matrix.md`: the status-code rows every endpoint × method needs, the describe structure, the token conventions.
-- `references/negative-testing.md`: the per-field invalid-type, omission, path-parameter and query-parameter loops.
+- `references/negative-testing.md`: the per-field invalid-type, omission, path-parameter and query-parameter loops, and a contract mismatch kept in `test.skip`.
 - `references/multi-call-steps.md`: the create → read `test.step()` pattern with cleanup.
 - `references/helper-fixtures.md`: the setup → `use()` → teardown pattern for promoted API setup.

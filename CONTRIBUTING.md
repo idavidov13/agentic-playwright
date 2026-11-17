@@ -38,7 +38,7 @@ A rule is written in more than one place. Change them in this order; the gates c
 1. **The Constitution row** in `AGENTS.md`. The file is capped at 800 words and 100 lines.
 2. **Adding, removing or renaming a rule**: the row list in `scripts/check-rules-drift.sh` and the rule counts in `README.md`.
 3. **The owning skill's Critical block** in `.claude/skills/<skill>/SKILL.md` (250 words at most), then the examples in that skill's `references/`. `scripts/rules-manifest.txt` maps each rule to its skill through a literal token; update the token when the literal changes.
-4. **The reviewer copies**: `.claude/skills/pr-reviewer/references/constitution-checklist.md`, `.github/prompts/pr-reviewer.prompt.md` and `.claude/skills/common-tasks/references/verification-checklist.md`.
+4. **The reviewer copies**: `.claude/skills/pr-reviewer/references/constitution-checklist.md`, `.github/prompts/pr-reviewer.prompt.md` and `.claude/skills/common-tasks/references/verification-checklist.md`; then the skill evals whose expected behaviour names the rule (`.claude/skills/*/evals/evals.json`).
 5. **The human docs**: `AI-WORKFLOWS.md`, the README section that shows the rule, and the comments in the example code under `pages/` and `tests/`.
 6. **A mechanical rule** also lives in `eslint.config.mts` and in `.claude/scripts/enforce_constitution.py`. The hook is a protected path: an agent drafts that change, a human applies it.
 7. `npm run skills:sync`, then `npm run check:skills` and `npm run lint`. A failing gate names the file.
