@@ -4,7 +4,7 @@ All notable changes to Agentic Playwright are documented here. Entries are liste
 
 ---
 
-## Unreleased
+## v2.0.5 -- A Quarantine Convention for Flaky Tests -- 2026-11-17
 
 ### Rules layer
 
