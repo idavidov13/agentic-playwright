@@ -91,8 +91,9 @@ const config = [
             // OFF, deliberately: the Constitution MANDATES `test.skip` +
             // `// FIXME` for documented-but-broken endpoints (WON'T: No
             // Silent Coverage Drops) — this rule at error/warn would fail CI
-            // on exactly that sanctioned pattern. Unjustified skips are a
-            // review-time finding (pr-reviewer checklist), not a lint error.
+            // on exactly that sanctioned pattern. `quarantine/annotation`
+            // (below, tests/** only) is the gate instead: a skip passes with
+            // `// FIXME: <ticket-url>` or a quarantine annotation.
             'playwright/no-skipped-test': 'off',
 
             // Additional Playwright rules for Constitution compliance
