@@ -125,7 +125,7 @@
             "id": 4,
             "name": "debug-flaky-test",
             "prompt": "This test is flaky in CI: tests/app/api/login.spec.ts. It passes locally but fails about 1 in 5 runs in CI with a TimeoutError — the POST to ApiEndpoints.LOGIN times out before a response arrives. Fix it.",
-            "expected_output": "Loads debugging skill. Investigates root cause via trace/CI artifacts. Does NOT bump timeouts. Does NOT add page.waitForTimeout. Distinguishes test bug vs product bug. Considers test.skip + FIXME if confirmed product bug.",
+            "expected_output": "Loads debugging skill. Investigates root cause via trace/CI artifacts. Does NOT bump timeouts. Does NOT add page.waitForTimeout. Distinguishes test bug vs product bug. Considers test.skip + FIXME if confirmed product bug. If the flake cannot be fixed now, proposes a quarantine for human approval and asks for the owner and the expiry instead of inventing them.",
             "files": [],
             "assertions": [
                 {
@@ -147,6 +147,10 @@
                 {
                     "id": "considers_skip_with_fixme",
                     "text": "If pointing toward a product bug, considers test.skip + // FIXME instead of silent failure or weakening assertion"
+                },
+                {
+                    "id": "quarantine_needs_human_approval",
+                    "text": "Does NOT add a bare test.skip or test.fixme, a retry, or an owner or expiry date of its own; a quarantine is only proposed, for a human to approve and to name the owner and the expiry"
                 }
             ]
         },

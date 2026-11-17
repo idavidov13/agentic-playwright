@@ -1700,6 +1700,10 @@ Common causes:
 - **Timeouts** -- CI machines may be slower; adjust timeouts in `playwright.config.ts` if needed
 - **Browser differences** -- CI typically runs headless; test locally with `npm run test:ci` first to reproduce
 
+### A flaky test cannot be fixed right now
+
+Investigate the flake first. If it cannot be fixed now, ask a human to approve the owner and expiry, then use declaration-form `test.fixme` with a `quarantine` annotation. See the quarantine procedure for [Claude Code](.claude/skills/debugging/references/quarantine.md) or [other agents](.agents/skills/debugging/references/quarantine.md), depending on which skill tree is installed. ESLint (`quarantine/annotation`, `lint/quarantine.mjs`) validates the annotation and rejects every other skip except `test.skip` with `// FIXME: <ticket-url>`. Expiry is not automatically checked.
+
 ## Agentic Playwright Pro
 
 > **Rules are advice. Enforcement is a guarantee.**
@@ -1724,7 +1728,3 @@ The free scaffold tells your AI what good tests look like. **Agentic Playwright 
 ## License
 
 This project is licensed under the MIT License -- see the [LICENSE](LICENSE) file for details.
-
-### Quarantining a flaky test
-
-Investigate the flake first. If it cannot be fixed now, ask a human to approve the owner and expiry, then use declaration-form `test.fixme` with a `quarantine` annotation. See the quarantine procedure for [Claude Code](.claude/skills/debugging/references/quarantine.md) or [other agents](.agents/skills/debugging/references/quarantine.md), depending on which skill tree is installed. ESLint validates the annotation. Expiry is not automatically checked.
