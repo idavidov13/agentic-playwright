@@ -23,6 +23,13 @@
   plus the AI rules your assistant picks up automatically, from the very first prompt.
 </p>
 
+> **🎓 Live workshop: Orchestrating Agentic Test Automation with Playwright (Cohort 4)**
+> **Monday, 14 December 2026 · 8:30 AM – 12:00 PM EST (13:30 – 17:00 UTC) · Online, 3.5 hours · hosted by Packt**
+>
+> I take you through the whole repo, layer by layer: the `AGENTS.md` Constitution your agent reads on every turn, the skills that load per file, and the hook that blocks XPath and hard waits before a file is written. Then we put it to work live: an API schema with tests from the contract, and page objects generated from `playwright-cli` exploration. You'll learn how to give the agent the right context and boundaries, review its output for drift, run the explore-before-generate workflow with its confidence gate, and tailor the Constitution and skills to your own application. Co-taught with Debbie O'Brien (Playwright Ambassador). The ticket includes the full recording and a certificate of completion.
+>
+> **40% off with code `ivan40` until 24 November 2026:** [**Reserve your seat →**](https://www.eventbrite.co.uk/e/orchestrating-agentic-test-automation-with-playwright-cohort-4-tickets-2004423143580?aff=IVANC4&discount=ivan40)
+
 > **What it guarantees, and what it does not.** The rules, the hook and the gates guarantee the form of a test: structure, selectors, schemas, data, tags. They do not guarantee its value. Which scenarios matter, and whether a test would catch a real bug, is decided in human review before the commit. Three questions for that review: would this test fail if the feature broke? Is every row left out recorded in a `// SCOPE` line? Does it pass on a rerun?
 
 ## See it
